@@ -101,7 +101,43 @@
       .custom-quiz-container { padding: 15px 3px; }
       .player-image { width: 75px; height:75px;}
     }
-  </style>
+  </body {
+  background: radial-gradient(ellipse at center, #d1e9ff 0%, #a0c6ef 100%);
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+.custom-quiz-container {
+  box-shadow: 0 8px 32px rgba(0,51,102,0.16);
+  border: 3px solid #007bff;
+  position: relative;
+  overflow: hidden;
+}
+.custom-quiz-container:after {
+  content: '';
+  background: url('https://upload.wikimedia.org/wikipedia/commons/8/85/FIFA_World_Cup_Trophy.svg') no-repeat center;
+  opacity: 0.035;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.player-image {
+  border: 4px solid #21e678;
+  box-shadow: 0 2px 12px #001d44aa;
+}
+/* Animate feedback */
+.result-feedback {
+  transition: color 0.28s, transform 0.28s;
+}
+.result-feedback.correct { 
+  color: #21e678;
+  transform: scale(1.2);
+}
+.result-feedback {
+  color: #ff4c29;
+}
+.answer-list button:active {
+  background: #92e2b2 !important;
+}
+
 </head>
 <body>
   <div class="custom-quiz-container">
