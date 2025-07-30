@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Football Atlas Lineup Quiz</title>
+<style>
+  body {
+    background: linear-gradient(135deg,#e0e9f8 0%,#cbe7ff 80%,#d1fde5 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0; padding: 0; min-height: 100vh;
+    color: #003366;
+  }
+  .container {
+    max-width: 540px;
+    margin: 48px auto 36px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 7px 24px #00336622;
+    padding: 38px 20px 26px 20px;
+    text-align: center;
+  }
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  .mode-select {
+    margin-bottom: 28px;
+  }
+  .mode-btn {
+    font-size: 18px;
+    padding: 10px 36px;
+    margin: 0 8px;
+    border-radius: 24px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .mode-btn.selected,
+  .mode-btn:hover {
+    background: #0056b3;
+  }
+  .lineup {
+    display: grid;
+    gap: 8px;
+    justify-content: center;
+    margin: 22px auto 10px;
+    background: #eef3fa;
+    padding: 22px 10px;
+    border-radius: 17px;
+    box-shadow: 0 2px 9px #007bff22;
+  }
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+  }
+  .pos {
+    min-width: 44px;
+    min-height: 38px;
+    padding: 6px 0;
+    border-radius: 10px;
+    background: #f9fafe;
+    font-size: 23px;
+    font-weight: 600;
+    box-shadow: 0 1.2px 4px #00336611;
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.03em;
+  }
+  .season-title {
+    font-size: 21px;
+    margin-bottom: 16px;
+  }
+  .input-row input[type="text"] {
+    font-size: 17px;
+    border-radius: 9px;
+    border: 1.6px solid #99ccf6;
+    padding: 8px 14px;
+    margin: 0 12px 0 0;
+    width: 140px;
+  }
+  .input-row button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 9px 32px;
+    border-radius: 20px;
+    font-size: 18px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .score,
+  .feedback {
+    font-size: 18px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .score {
+    color: #007b6e;
+  }
+  .feedback.correct {
+    color: #21e678;
+  }
+  .feedback.incorrect {
+    color: #e85e2b;
+  }
+  #next-btn {
+    margin-top: 24px;
+    background: #003366;
+    color: white;
+    border-radius: 28px;
+    padding: 14px 48px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    .container {
+      padding: 20px 10px 18px 10px;
+    }
+    .lineup {
+      padding: 12px 6px;
+    }
+    .row {
+      gap: 10px;
+    }
+    .pos {
+      min-width: 30px;
+      font-size: 18px;
+    }
+    .input-row input[type="text"] {
+      width: 100px;
+      margin-right: 8px;
+      padding: 6px 10px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Guess the Team from their Starting XI by Nationality</h2>
+    <div class="mode-select">
+      <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')">Normal Mode</button>
+      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
+    </div>
+    <div id="quiz-area"></div>
+    <div class="score" id="scorebox"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="next-btn" style="display:none" onclick="nextLineup()">Next Lineup</button>
+  </div>
+
+<script>
+/* ====== DATA: EASY (Normal) & HARD lineup teams ====== */
+
+/* Normal mode: 3 easy teams per season, neutral hints */
+const easyLineups = [
+  /* Use the full data from previous message for all 75 teams.
+     (Only snippet below for space, please replace with full array) */
+  {
+    season:"2000/01", team:"Real Madrid", formation:"4-4-2",
+    posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇪🇸","🇧🇷"],["🇵🇹","🇫🇷","🇪🇸","🇦🇷"],["🇪🇸","🇪🇸"]],
+    answer:"Real Madrid", info:"Became continental champions after a high-profile squad overhaul."
+  },
+  {
+    season:"2000/01", team:"Manchester United", formation:"4-4-2",
+    posFlags:[["🇫🇷"],["🏴","🇳🇱","🇫🇷","🇮🇪"],["🏴","🇮🇪","🏴","🏴"],["🏴","🇹🇹"]],
+    answer:"Manchester United", info:"Secured another top-flight title after leading for most of the season."
+  },
+  {
+    season:"2000/01", team:"AS Roma", formation:"3-4-1-2",
+    posFlags:[ ["🇮🇹"], ["🇫🇷","🇦🇷","🇧🇷"], ["🇧🇷","🇮🇹","🇧🇷","🇫🇷"], ["🇮🇹"], ["🇦🇷","🇮🇹"] ],
+    answer:"AS Roma", info:"Ended a long title drought after consistent performances throughout the campaign."
+  },
+{
+  season:"2001/02", team:"Real Madrid", formation:"4-4-2",
+  posFlags:[["🇪🇸"],["🇪🇸","🇪🇸","🇪🇸","🇧🇷"],["🇵🇹","🇫🇷","🇦🇷","🇫🇷"],["🇪🇸","🇪🇸"]],
+  answer:"Real Madrid", info:"Lifted a major continental trophy, punctuated by a memorable goal in the final."
+},
+{
+  season:"2001/02", team:"Arsenal", formation:"4-4-2",
+  posFlags:[["🏴"],["🇨🇲","🏴","🏴","🏴"],["🇸🇪","🇫🇷","🇫🇷","🇫🇷"],["🇳🇱","🇫🇷"]],
+  answer:"Arsenal", info:"Clinched both the main domestic league and cup in the same year."
+},
+{
+  season:"2001/02", team:"Juventus", formation:"4-4-2",
+  posFlags:[["🇮🇹"],["🇫🇷","🇮🇹","🇺🇾","🇮🇹"],["🇮🇹","🇮🇹","🇳🇱","🇨🇿"],["🇫🇷","🇮🇹"]],
+  answer:"Juventus", info:"Captured the league title in dramatic fashion after a key late result elsewhere."
+},
+
+// 2002/03
+{
+  season:"2002/03", team:"AC Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇮🇹","🇮🇹","🇮🇹","🇬🇪"],["🇮🇹","🇮🇹","🇳🇱"],["🇵🇹"],["🇺🇦","🇮🇹"]],
+  answer:"AC Milan", info:"Claimed a continental trophy after prevailing in a tight all-national decider."
+},
+{
+  season:"2002/03", team:"Manchester United", formation:"4-4-1-1",
+  posFlags:[["🇫🇷"],["🏴","🏴","🇫🇷","🇮🇪"],["🏴","🇮🇪","🏴"],["🏴"],["🇳🇱"]],
+  answer:"Manchester United", info:"Regained domestic supremacy in a campaign decided in the closing weeks."
+},
+{
+  season:"2002/03", team:"Real Madrid", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇪🇸","🇪🇸","🇪🇸","🇧🇷"],["🇫🇷","🇧🇷"],["🇵🇹","🇫🇷","🇪🇸"],["🇧🇷"]],
+  answer:"Real Madrid", info:"Finished atop their country's league after a season of consistent attacking play."
+},
+
+// 2003/04
+{
+  season:"2003/04", team:"Arsenal", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇨🇲","🇨🇮","🏴","🏴"],["🇸🇪","🇧🇷","🇫🇷","🇫🇷"],["🇳🇱","🇫🇷"]],
+  answer:"Arsenal", info:"Completed the campaign without a single defeat in regular competition."
+},
+{
+  season:"2003/04", team:"FC Porto", formation:"4-3-1-2",
+  posFlags:[["🇵🇹"],["🇵🇹","🇵🇹","🇵🇹","🇵🇹"],["🇵🇹","🇵🇹","🇷🇺"],["🇵🇹"],["🇧🇷","🇿🇦"]],
+  answer:"FC Porto", info:"Surprised Europe by capturing the continent’s top prize with a disciplined approach."
+},
+{
+  season:"2003/04", team:"AC Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇮🇹","🇮🇹","🇮🇹"],["🇮🇹","🇮🇹","🇳🇱"],["🇧🇷"],["🇺🇦","🇩🇰"]],
+  answer:"AC Milan", info:"Secured a domestic crown while balancing a run to the latter stages in Europe."
+},
+
+// 2004/05
+{
+  season:"2004/05", team:"Liverpool", formation:"4-4-1-1",
+  posFlags:[["🇵🇱"],["🇮🇪","🇫🇮","🇸🇳","🇲🇱"],["🇪🇸","🇪🇸","🏴","🇳🇴"],["🇳🇴"],["🇨🇿"]],
+  answer:"Liverpool", info:"Won a major continental trophy on penalties after a huge comeback in the final."
+},
+{
+  season:"2004/05", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇵🇹","🏴","🇫🇷","🏴"],["🇬🇭","🇫🇷","🏴"],["🇮🇪","🇨🇮","🇳🇱"]],
+  answer:"Chelsea", info:"Set a new points record while conceding remarkably few goals."
+},
+{
+  season:"2004/05", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇪🇸","🇳🇱"],["🇵🇹","🇲🇽","🇪🇸"],["🇫🇷","🇨🇲","🇧🇷"]],
+  answer:"Barcelona", info:"Returned to the domestic summit after several years’ absence."
+},
+
+// 2005/06
+{
+  season:"2005/06", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇲🇽","🇪🇸","🇳🇱"],["🇵🇹","🇪🇸","🇪🇸"],["🇫🇷","🇨🇲","🇧🇷"]],
+  answer:"Barcelona", info:"Clinched a major European title, capping off an attacking season."
+},
+{
+  season:"2005/06", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇫🇷","🏴","🇵🇹","🇫🇷"],["🇬🇭","🇫🇷","🏴"],["🇳🇱","🇨🇮","🏴"]],
+  answer:"Chelsea", info:"Retained the main domestic championship under a recently appointed manager."
+},
+{
+  season:"2005/06", team:"Lyon", formation:"4-3-3",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇮🇹"],["🇵🇹","🇲🇱","🇫🇷"],["🇫🇷","🇳🇴","🇫🇷"]],
+  answer:"Lyon", info:"Displayed domestic dominance by achieving another consecutive championship."
+},
+
+// 2006/07
+{
+  season:"2006/07", team:"AC Milan", formation:"4-3-2-1",
+  posFlags:[["🇧🇷"],["🇮🇹","🇮🇹","🇮🇹","🇬🇪"],["🇮🇹","🇮🇹","🇳🇱"],["🇧🇷","🇳🇱"],["🇮🇹"]],
+  answer:"AC Milan", info:"Claimed continental honors with a composed performance in the decider."
+},
+{
+  season:"2006/07", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🏴","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇮🇪","🏴"],["🏴","🇫🇷"]],
+  answer:"Manchester United", info:"Led the table by a comfortable margin and scored prolifically."
+},
+{
+  season:"2006/07", team:"Lyon", formation:"4-3-3",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇮🇹"],["🇵🇹","🇲🇱","🇫🇷"],["🇫🇷","🇳🇴","🇫🇷"]],
+  answer:"Lyon", info:"Continued domestic dominance in their home country."
+},
+
+// 2007/08
+{
+  season:"2007/08", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🏴","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇰🇷","🏴"],["🇦🇷","🏴"]],
+  answer:"Manchester United", info:"Claimed a double after prevailing in a penalty shootout."
+},
+{
+  season:"2007/08", team:"Bayern Munich", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇧🇷","🇧🇪","🇩🇪"],["🇳🇱","🇹🇷","🇫🇷","🇩🇪"],["🇮🇹","🇩🇪"]],
+  answer:"Bayern Munich", info:"Sealed another domestic double and returned atop the standings."
+},
+{
+  season:"2007/08", team:"Inter Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇨🇴","🇦🇷","🇷🇴"],["🇦🇷","🇫🇷","🇷🇸"],["🇵🇹"],["🇸🇪","🇭🇳"]],
+  answer:"Inter Milan", info:"Secured their status with a third straight championship."
+},
+
+// 2008/09
+{
+  season:"2008/09", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇪🇸","🇫🇷"],["🇨🇮","🇪🇸","🇪🇸"],["🇦🇷","🇨🇲","🇫🇷"]],
+  answer:"Barcelona", info:"Earned an unprecedented sweep of all available major trophies."
+},
+{
+  season:"2008/09", team:"Inter Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇨🇴","🇦🇷","🇷🇴"],["🇦🇷","🇦🇷","🇷🇸"],["🇷🇸"],["🇸🇪","🇧🇷"]],
+  answer:"Inter Milan", info:"Extended their streak at home ahead of a coaching change."
+},
+{
+  season:"2008/09", team:"Wolfsburg", formation:"4-3-1-2",
+  posFlags:[["🇨🇭"],["🇩🇪","🇮🇹","🇩🇪","🇩🇪"],["🇯🇵","🇧🇷","🇩🇪"],["🇧🇦"],["🇧🇷","🇧🇦"]],
+  answer:"Wolfsburg", info:"Stunned observers by outscoring the pack to finish top."
+},
+
+// 2009/10
+{
+  season:"2009/10", team:"Inter Milan", formation:"4-2-3-1",
+  posFlags:[["🇧🇷"],["🇧🇷","🇧🇷","🇦🇷","🇷🇴"],["🇦🇷","🇦🇷"],["🇳🇱","🇲🇰","🇨🇲"],["🇦🇷"]],
+  answer:"Inter Milan", info:"Crowned champions in three major competitions within a single season."
+},
+{
+  season:"2009/10", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇷🇸","🏴","🇧🇷","🏴"],["🇩🇪","🏴","🇵🇹"],["🇫🇷","🇨🇮","🇫🇷"]],
+  answer:"Chelsea", info:"Set scoring records and captured both of their home country’s main trophies."
+},
+{
+  season:"2009/10", team:"Bayern Munich", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇧🇪","🇦🇷","🇩🇪"],["🇳🇱","🇺🇦","🇩🇪","🇫🇷"],["🇭🇷","🇩🇪"]],
+  answer:"Bayern Munich", info:"Reached the continental final after clinching a league-and-cup double."
+},
+
+// 2010/11
+{
+  season:"2010/11", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇦🇷","🇫🇷"],["🇪🇸","🇪🇸","🇪🇸"],["🇪🇸","🇦🇷","🇪🇸"]],
+  answer:"Barcelona", info:"Dominated Europe with a brand of possession-based football."
+},
+{
+  season:"2010/11", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🇧🇷","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇧🇷","🇰🇷"],["🇲🇽","🏴"]],
+  answer:"Manchester United", info:"Celebrated a record-breaking championship before falling short in the last continental match."
+},
+{
+  season:"2010/11", team:"Borussia Dortmund", formation:"4-2-3-1",
+  posFlags:[["🇩🇪"],["🇵🇱","🇩🇪","🇩🇪","🇩🇪"],["🇩🇪","🇹🇷"],["🇵🇱","🇯🇵","🇩🇪"],["🇵🇾"]],
+  answer:"Borussia Dortmund", info:"Emerged as the new force after a season marked by high-paced attacking play."
+},
+
+// 2011/12
+{
+  season:"2011/12", team:"Chelsea", formation:"4-2-3-1",
+  posFlags:[["🇨🇿"],["🇵🇹","🏴","🇧🇷","🏴"],["🇳🇬","🏴"],["🇪🇸","🇪🇸","🇨🇮"],["🇨🇮"]],
+  answer:"Chelsea", info:"Lifted their first continental crown in a dramatic penalty shootout."
+},
+{
+  season:"2011/12", team:"Real Madrid", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇪🇸","🇵🇹","🇪🇸","🇧🇷"],["🇩🇪","🇪🇸"],["🇦🇷","🇩🇪","🇵🇹"],["🇫🇷"]],
+  answer:"Real Madrid", info:"Broke domestic records while reclaiming the top spot."
+},
+{
+  season:"2011/12", team:"Manchester City", formation:"4-2-2-2",
+  posFlags:[["🏴"],["🏴","🇧🇪","🇫🇷","🇫🇷"],["🇨🇮","🏴"],["🇪🇸","🇫🇷"],["🇦🇷","🇧🇦"]],
+  answer:"Manchester City", info:"Secured the crown in their home country with a last-minute goal."
+},
+
+// 2012/13
+{
+  season:"2012/13", team:"Bayern Munich", formation:"4-2-3-1",
+  posFlags:[["🇩🇪"],["🇩🇪","🇧🇷","🇩🇪","🇦🇹"],["🇪🇸","🇩🇪"],["🇳🇱","🇩🇪","🇫🇷"],["🇭🇷"]],
+  answer:"Bayern Munich", info:"Completed a historic triple by sweeping every major competition available."
+},
+{
+  season:"2012/13", team:"Manchester United", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇧🇷","🏴","🏴","🇫🇷"],["🏴","🏴"],["🏴","🏴","🇯🇵"],["🇳🇱"]],
+  answer:"Manchester United", info:"Celebrated title success in their final season with a legendary manager."
+},
+{
+  season:"2012/13", team:"Juventus", formation:"3-5-2",
+  posFlags:[["🇮🇹"],["🇮🇹","🇮🇹","🇮🇹"],["🇨🇭","🇫🇷","🇮🇹","🇬🇭","🇮🇹"],["🇲🇪","🇮🇹"]],
+  answer:"Juventus", info:"Finished top again, going unbeaten in their domestic campaign."
+},
+
+// 2013/14
+{
+  season:"2013/14", team:"Real Madrid", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇪🇸","🇵🇹","🇪🇸","🇵🇹"],["🇭🇷","🇪🇸","🇦🇷"],["🏴","🇫🇷","🇵🇹"]],
+  answer:"Real Madrid", info:"Secured a milestone continental triumph after a dramatic equalizer in stoppage time."
+},
+{
+  season:"2013/14", team:"Atletico Madrid", formation:"4-4-2",
+  posFlags:[["🇧🇪"],["🇪🇸","🇺🇾","🇧🇷","🇧🇷"],["🇹🇷","🇵🇹","🇪🇸","🇪🇸"],["🇧🇷","🇪🇸"]],
+  answer:"Atletico Madrid", info:"Defied predictions by finishing top after a late sequence of strong results."
+},
+{
+  season:"2013/14", team:"Manchester City", formation:"4-4-2",
+  posFlags:[["🏴"],["🇦🇷","🇧🇪","🇫🇷","🇷🇸"],["🇪🇸","🇨🇮","🇧🇷","🇫🇷"],["🇦🇷","🇧🇦"]],
+  answer:"Manchester City", info:"Edged their main rivals by clinching victory on the final day."
+},
+
+// 2014/15
+{
+  season:"2014/15", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇨🇱"],["🇧🇷","🇪🇸","🇦🇷","🇪🇸"],["🇭🇷","🇪🇸","🇪🇸"],["🇦🇷","🇺🇾","🇧🇷"]],
+  answer:"Barcelona", info:"Their prolific attack helped claim three major trophies in the same campaign."
+},
+{
+  season:"2014/15", team:"Juventus", formation:"4-3-1-2",
+  posFlags:[["🇮🇹"],["🇨🇭","🇮🇹","🇮🇹","🇫🇷"],["🇫🇷","🇮🇹","🇨🇱"],["🇦🇷"],["🇪🇸","🇦🇷"]],
+  answer:"Juventus", info:"Achieved a notable domestic double and reached the last European match of the year."
+},
+{
+  season:"2014/15", team:"Chelsea", formation:"4-2-3-1",
+  posFlags:[["🇧🇪"],["🇷🇸","🏴","🏴","🇪🇸"],["🇷🇸","🇪🇸"],["🇧🇷","🇪🇸","🇧🇪"],["🇪🇸"]],
+  answer:"Chelsea", info:"Led for most of the season and were ultimately crowned champions."
+},
+
+// 2015/16
+{
+  season:"2015/16", team:"Leicester City", formation:"4-4-2",
+  posFlags:[["🇩🇰"],["🏴","🇩🇪","🇯🇲","🇦🇹"],["🇩🇿","🇫🇷","🏴","🏴"],["🇯🇵","🏴"]],
+  answer:"Leicester City", info:"Stunned the football world by finishing at the summit despite outsider status."
+},
+{
+  season:"2015/16", team:"Real Madrid", formation:"4-3-3",
+  posFlags:[["🇨🇷"],["🇪🇸","🇵🇹","🇪🇸","🇧🇷"],["🇭🇷","🇧🇷","🇩🇪"],["🏴","🇫🇷","🇵🇹"]],
+  answer:"Real Madrid", info:"Won their national and continental titles under a new manager."
+},
+{
+  season:"2015/16", team:"Paris SG", formation:"4-3-3",
+  posFlags:[["🇩🇪"],["🇧🇷","🇧🇷","🇧🇷","🇫🇷"],["🇮🇹","🇮🇹","🇫🇷"],["🇦🇷","🇸🇪","🇺🇾"]],
+  answer:"Paris SG", info:"Won the championship months before the season's end with several high-scoring wins."
+},
+
+// 2016/17
+{
+  season:"2016/17", team:"Real Madrid", formation:"4-3-1-2",
+  posFlags:[["🇨🇷"],["🇪🇸","🇪🇸","🇪🇸","🇧🇷"],["🇭🇷","🇧🇷","🇩🇪"],["🇪🇸"],["🇵🇹","🇫🇷"]],
+  answer:"Real Madrid", info:"Celebrated consecutive major continental triumphs for the first time."
+},
+{
+  season:"2016/17", team:"Chelsea", formation:"3-4-3",
+  posFlags:[["🇧🇪"],["🇪🇸","🇧🇷","🏴"],["🇳🇬","🇫🇷","🇪🇸","🏴"],["🇪🇸","🇪🇸","🇧🇪"]],
+  answer:"Chelsea", info:"Changed defensive systems and powered through most opposition all season."
+},
+{
+  season:"2016/17", team:"AS Monaco", formation:"4-4-2",
+  posFlags:[["🇭🇷"],["🇫🇷","🇵🇱","🇧🇷","🇫🇷"],["🇵🇹","🇧🇷","🇫🇷","🇫🇷"],["🇨🇴","🇫🇷"]],
+  answer:"AS Monaco", info:"Led with youth and attacking play to edge out established rivals."
+},
+
+// 2017/18
+{
+  season:"2017/18", team:"Manchester City", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🇧🇪","🇦🇷","🇫🇷"],["🇧🇷","🇪🇸","🇧🇪"],["🏴","🇦🇷","🇩🇪"]],
+  answer:"Manchester City", info:"Achieved a record points tally and won by a wide margin."
+},
+{
+  season:"2017/18", team:"Real Madrid", formation:"4-3-1-2",
+  posFlags:[["🇨🇷"],["🇪🇸","🇪🇸","🇪🇸","🇧🇷"],["🇭🇷","🇧🇷","🇩🇪"],["🇪🇸"],["🇵🇹","🇫🇷"]],
+  answer:"Real Madrid", info:"Completed a once-unprecedented three-peat on the continent."
+},
+{
+  season:"2017/18", team:"Liverpool", formation:"4-3-3",
+  posFlags:[["🇩🇪"],["🏴","🇭🇷","🇳🇱","🏴"],["🏴","🏴","🇳🇱"],["🇪🇬","🇧🇷","🇸🇳"]],
+  answer:"Liverpool", info:"Captured hearts with a dynamic attack and a deep continental run."
+},
+
+// 2018/19
+{
+  season:"2018/19", team:"Liverpool", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🇨🇲","🇳🇱","🏴"],["🇧🇷","🏴","🇳🇱"],["🇪🇬","🇧🇷","🇸🇳"]],
+  answer:"Liverpool", info:"Stage an incredible semi-final turnaround on route to a title."
+},
+{
+  season:"2018/19", team:"Manchester City", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🇧🇪","🇫🇷","🇺🇦"],["🇧🇷","🇪🇸","🇵🇹"],["🏴","🇦🇷","🇩🇪"]],
+  answer:"Manchester City", info:"Achieved an unprecedented clean sweep of domestic silverware."
+},
+{
+  season:"2018/19", team:"Ajax", formation:"4-2-3-1",
+  posFlags:[["🇨🇲"],["🇲🇦","🇳🇱","🇳🇱","🇦🇷"],["🇩🇰","🇳🇱"],["🇲🇦","🇳🇱","🇷🇸"],["🇧🇷"]],
+  answer:"Ajax", info:"Defeated several continental giants with an exciting young lineup."
+},
+
+// 2019/20
+{
+  season:"2019/20", team:"Bayern Munich", formation:"4-2-3-1",
+  posFlags:[["🇩🇪"],["🇫🇷","🇦🇹","🇩🇪","🇨🇦"],["🇪🇸","🇩🇪"],["🇫🇷","🇩🇪","🇭🇷"],["🇵🇱"]],
+  answer:"Bayern Munich", info:"Swept every possible trophy in a trophy-packed year."
+},
+{
+  season:"2019/20", team:"Liverpool", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🏴","🇳🇱","🏴"],["🇧🇷","🏴","🇳🇱"],["🇪🇬","🇧🇷","🇸🇳"]],
+  answer:"Liverpool", info:"Secured a long-awaited league title with impressive consistency."
+},
+{
+  season:"2019/20", team:"PSG", formation:"4-3-3",
+  posFlags:[["🇨🇷"],["🇩🇪","🇧🇷","🇧🇷","🇪🇸"],["🇮🇹","🇧🇷","🇦🇷"],["🇦🇷","🇦🇷","🇧🇷"]],
+  answer:"PSG", info:"Stormed to numerous domestic cup triumphs and reached the continental final."
+},
+
+// 2020/21
+{
+  season:"2020/21", team:"Chelsea", formation:"3-4-2-1",
+  posFlags:[["🇸🇳"],["🇪🇸","🇧🇷","🇩🇪"],["🏴","🇮🇹","🇫🇷","🏴"],["🏴","🇩🇪"],["🇩🇪"]],
+  answer:"Chelsea", info:"Lifted a major European trophy after a mid-season change at the helm."
+},
+{
+  season:"2020/21", team:"Inter Milan", formation:"3-5-2",
+  posFlags:[["🇸🇮"],["🇸🇰","🇳🇱","🇮🇹"],["🇲🇦","🇮🇹","🇩🇰","🇭🇷","🏴"],["🇧🇪","🇦🇷"]],
+  answer:"Inter Milan", info:"Ended a period of rival dominance with a strong second half of the year."
+},
+{
+  season:"2020/21", team:"Manchester City", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🇵🇹","🏴","🇺🇦"],["🇩🇪","🇪🇸","🇧🇷"],["🇩🇿","🇧🇪","🏴"]],
+  answer:"Manchester City", info:"Combined a sturdy defense with creative midfield play to top the table."
+},
+
+// 2021/22
+{
+  season:"2021/22", team:"Real Madrid", formation:"4-3-3",
+  posFlags:[["🇧🇪"],["🇫🇷","🇦🇹","🇧🇷","🇪🇸"],["🇭🇷","🇧🇷","🇩🇪"],["🇧🇷","🇫🇷","🇧🇷"]],
+  answer:"Real Madrid", info:"Secured continental triumphs with a series of late-game heroics."
+},
+{
+  season:"2021/22", team:"AC Milan", formation:"4-2-3-1",
+  posFlags:[["🇫🇷"],["🇮🇹","🇫🇷","🏴","🇫🇷"],["🇩🇿","🇮🇹"],["🇵🇹","🇪🇸","🇧🇪"],["🇫🇷"]],
+  answer:"AC Milan", info:"Celebrated a milestone with their first title in over a decade."
+},
+{
+  season:"2021/22", team:"Liverpool", formation:"4-3-3",
+  posFlags:[["🇧🇷"],["🏴","🇨🇲","🇳🇱","🏴"],["🇪🇸","🇧🇷","🏴"],["🇪🇬","🇸🇳","🇨🇴"]],
+  answer:"Liverpool", info:"Competed for multiple trophies and finished just short of a clean sweep."
+},
+
+// 2022/23
+{
+  season:"2022/23", team:"Manchester City", formation:"3-2-4-1",
+  posFlags:[["🇧🇷"],["🇵🇹","🇨🇭","🏴"],["🇪🇸","🏴"],["🇵🇹","🇩🇪","🇧🇪","🏴"],["🇳🇴"]],
+  answer:"Manchester City", info:"Became treble winners after a hard-fought season."
+},
+{
+  season:"2022/23", team:"Napoli", formation:"4-3-3",
+  posFlags:[["🇮🇹"],["🇮🇹","🇰🇷","🇽🇰","🇵🇹"],["🇨🇲","🇸🇰","🇵🇱"],["🇲🇽","🇳🇬","🇬🇪"]],
+  answer:"Napoli", info:"Ended a multi-decade wait to secure domestic honors."
+},
+{
+  season:"2022/23", team:"Arsenal", formation:"4-3-3",
+  posFlags:[["🏴"],["🏴","🇫🇷","🇧🇷","🇺🇦"],["🇬🇭","🇳🇴","🇨🇭"],["🏴","🇧🇷","🇧🇷"]],
+  answer:"Arsenal", info:"Commanded the league for much of the season with a youthful squad."
+},
+
+// 2023/24
+{
+  season:"2023/24", team:"Bayer Leverkusen", formation:"3-4-2-1",
+  posFlags:[["🇫🇮"],["🇧🇫","🇩🇪","🇪🇨"],["🇳🇱","🇨🇭","🇦🇷","🇪🇸"],["🇩🇪","🇩🇪"],["🇳🇬"]],
+  answer:"Bayer Leverkusen", info:"Completed the campaign as invincible champions."
+},
+{
+  season:"2023/24", team:"Real Madrid", formation:"4-3-1-2",
+  posFlags:[["🇺🇦"],["🇪🇸","🇩🇪","🇦🇹","🇫🇷"],["🇺🇾","🇫🇷","🇩🇪"],["🏴"],["🇧🇷","🇧🇷"]],
+  answer:"Real Madrid", info:"Featured a rejuvenated attack and captured both major trophies."
+},
+{
+  season:"2023/24", team:"Inter Milan", formation:"3-5-2",
+  posFlags:[["🇨🇭"],["🇫🇷","🇮🇹","🇳🇱"],["🇳🇱","🇮🇹","🇹🇷","🇦🇲","🇮🇹"],["🇦🇷","🇫🇷"]],
+  answer:"Inter Milan", info:"Wrapped up the championship ahead of schedule with a solid defense."
+},
+
+// 2024/25 (projection/example, you may revise based on real data later)
+{
+  season:"2024/25", team:"Real Madrid", formation:"4-3-3",
+  posFlags:[["🇧🇪"],["🇪🇸","🇩🇪","🇧🇷","🇨🇦"],["🇫🇷","🇺🇾","🏴"],["🇧🇷","🇫🇷","🇧🇷"]],
+  answer:"Real Madrid", info:"Emerged as favorites early on and maintained their advantage all season."
+},
+{
+  season:"2024/25", team:"Arsenal", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🏴","🇫🇷","🇧🇷","🇳🇱"],["🏴","🇳🇴","🇵🇹"],["🏴","🇩🇪","🇧🇷"]],
+  answer:"Arsenal", info:"Showed notable consistency to contend at the top month after month."
+},
+{
+  season:"2024/25", team:"Bayern Munich", formation:"4-2-3-1",
+  posFlags:[["🇩🇪"],["🇲🇦","🇰🇷","🇳🇱","🇵🇹"],["🇩🇪","🇵🇹"],["🇩🇪","🇩🇪","🇫🇷"],["🏴"]],
+  answer:"Bayern Munich", info:"A fast start and strong spring finished off another championship campaign."
+}
+];
+
+/* Hard mode: 5 teams per season, flags only, guess team & season */
+const hardLineups = [
+  /* Include all 125 teams previously provided here exactly */
+  {
+    season:"2000/01", team:"Real Madrid", formation:"4-4-2",
+    posFlags: [ ["🇪🇸"], ["🇧🇷","🇫🇷","🇪🇸","🇧🇷"], ["🇪🇸","🇫🇷","🇵🇹","🇪🇸"], ["🇪🇸","🇪🇸"] ],
+    answer:"Real Madrid"
+  },
+  {
+    season:"2000/01", team:"Roma", formation:"3-4-1-2",
+    posFlags: [ ["🇮🇹"], ["🇮🇹","🇫🇷","🇮🇹"], ["🇧🇷","🇮🇹","🇮🇹","🇧🇷"], ["🇮🇹"], ["🇮🇹","🇧🇦"] ], answer:"Roma"
+  },
+  {
+    season:"2000/01", team:"Bayern Munich", formation:"3-5-2",
+    posFlags: [ ["🇩🇪"], ["🇧🇷","🇩🇪","🇩🇪"], ["🇫🇷","🇩🇪","🇩🇪","🇩🇪","🇧🇷"], ["🇧🇷","🇩🇪"] ], answer:"Bayern Munich"
+  },
+  {
+    season:"2000/01", team:"Deportivo La Coruña", formation:"4-2-3-1",
+    posFlags: [ ["🇪🇸"], ["🇪🇸","🇦🇷","🇧🇷","🇪🇸"], ["🇪🇸","🇧🇷"], ["🇪🇸","🇪🇸","🇧🇷"], ["🇵🇾"] ], answer:"Deportivo La Coruña"
+  },
+  {
+    season:"2000/01", team:"Liverpool", formation:"4-4-2",
+    posFlags: [ ["🏴"], ["🏴","🏴","🇫🇮","🏴"], ["🇪🇸","🇪🇸","🏴","🏴"], ["🏴","🏴"] ], answer:"Liverpool"
+  },
+  // 2001/02
+  {
+    season:"2001/02", team:"Juventus", formation:"3-4-1-2",
+    posFlags: [ ["🇮🇹"], ["🇺🇾","🇮🇹","🇮🇹"], ["🇮🇹","🇮🇹","🇨🇭","🇨🇭"], ["🇫🇷"], ["🇫🇷","🇮🇹"] ], answer:"Juventus"
+  },
+  {
+    season:"2001/02", team:"Bayer Leverkusen", formation:"4-3-3",
+    posFlags: [ ["🇩🇪"], ["🇦🇷","🇧🇷","🇩🇪","🇩🇪"], ["🇧🇷","🇩🇪","🇩🇪"], ["🇩🇪","🇧🇷","🇩🇪"] ], answer:"Bayer Leverkusen"
+  },
+  {
+    season:"2001/02", team:"Valencia", formation:"4-4-2",
+    posFlags: [ ["🇪🇸"], ["🇦🇷","🇦🇷","🇦🇷","🇪🇸"], ["🇪🇸","🇧🇷","🇦🇷","🇪🇸"], ["🇦🇷","🇪🇸"] ], answer:"Valencia"
+  },
+  {
+    season:"2001/02", team:"Arsenal", formation:"4-4-2",
+    posFlags: [ ["🇩🇪"], ["🇨🇲","🇨🇮","🏴","🏴"], ["🇫🇷","🇧🇷","🇫🇷","🇸🇪"], ["🇫🇷","🇫🇷"] ], answer:"Arsenal"
+  },
+  {
+    season:"2001/02", team:"AS Monaco", formation:"4-4-2",
+    posFlags: [ ["🇫🇷"], ["🇫🇷","🇮🇹","🇫🇷","🇧🇷"], ["🇫🇷","🇿🇲","🇫🇷","🇫🇷"], ["🇦🇷","🇫🇷"] ], answer:"Monaco"
+  },  
+  {
+  season:"2002/03", team:"AC Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇮🇹","🇮🇹","🇮🇹","🇬🇪"],["🇮🇹","🇮🇹","🇳🇱"],["🇵🇹"],["🇺🇦","🇮🇹"]],
+  answer:"AC Milan"
+},
+{
+  season:"2002/03", team:"Manchester United", formation:"4-4-1-1",
+  posFlags:[["🇫🇷"],["🏴","🏴","🇫🇷","🇮🇪"],["🏴","🇮🇪","🏴"],["🏴"],["🇳🇱"]],
+  answer:"Manchester United"
+},
+{
+  season:"2002/03", team:"Real Madrid", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇪🇸","🇪🇸","🇪🇸","🇧🇷"],["🇫🇷","🇧🇷"],["🇵🇹","🇫🇷","🇪🇸"],["🇧🇷"]],
+  answer:"Real Madrid"
+},
+{
+  season:"2002/03", team:"Juventus", formation:"3-5-2",
+  posFlags:[["🇮🇹"],["🇳🇱","🇮🇹","🇮🇹"],["🇮🇹","🇮🇹","🇫🇷","🇨🇿","🇮🇹"],["🇧🇦","🇮🇹"]],
+  answer:"Juventus"
+},
+{
+  season:"2002/03", team:"Deportivo La Coruña", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇪🇸","🇧🇷","🇪🇸","🇧🇷"],["🇪🇸","🇧🇷"],["🇪🇸","🇧🇷","🇪🇸"],["🇵🇾"]],
+  answer:"Deportivo La Coruña"
+},
+{
+  season:"2003/04", team:"Arsenal", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇨🇲","🇨🇮","🏴","🏴"],["🇸🇪","🇧🇷","🇫🇷","🇫🇷"],["🇳🇱","🇫🇷"]],
+  answer:"Arsenal"
+},
+{
+  season:"2003/04", team:"FC Porto", formation:"4-3-1-2",
+  posFlags:[["🇵🇹"],["🇵🇹","🇵🇹","🇵🇹","🇵🇹"],["🇵🇹","🇵🇹","🇷🇺"],["🇵🇹"],["🇧🇷","🇿🇦"]],
+  answer:"FC Porto"
+},
+{
+  season:"2003/04", team:"AC Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇮🇹","🇮🇹","🇮🇹"],["🇮🇹","🇮🇹","🇳🇱"],["🇧🇷"],["🇺🇦","🇩🇰"]],
+  answer:"AC Milan"
+},
+{
+  season:"2003/04", team:"Monaco", formation:"4-4-2",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇫🇷"],["🇫🇷","🇨🇭","🇫🇷","🇫🇷"],["🇨🇬","🇩🇰"]],
+  answer:"Monaco"
+},
+{
+  season:"2003/04", team:"Valencia", formation:"4-2-3-1",
+  posFlags:[["🇪🇸"],["🇪🇸","🇦🇷","🇦🇷","🇮🇹"],["🇪🇸","🇪🇸"],["🇧🇷","🇪🇸","🇪🇸"],["🇪🇸"]],
+  answer:"Valencia"
+},
+{
+  season:"2004/05", team:"Liverpool", formation:"4-4-1-1",
+  posFlags:[["🇵🇱"],["🇮🇪","🇫🇮","🇸🇳","🇲🇱"],["🇪🇸","🇪🇸","🏴","🇳🇴"],["🇳🇴"],["🇨🇿"]],
+  answer:"Liverpool"
+},
+{
+  season:"2004/05", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇵🇹","🏴","🇫🇷","🏴"],["🇬🇭","🇫🇷","🏴"],["🇮🇪","🇨🇮","🇳🇱"]],
+  answer:"Chelsea"
+},
+{
+  season:"2004/05", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇪🇸","🇳🇱"],["🇵🇹","🇲🇽","🇪🇸"],["🇫🇷","🇨🇲","🇧🇷"]],
+  answer:"Barcelona"
+},
+{
+  season:"2004/05", team:"Juventus", formation:"4-4-2",
+  posFlags:[["🇮🇹"],["🇮🇹","🇮🇹","🇮🇹","🇮🇹"],["🇮🇹","🇧🇷","🇧🇷","🇫🇷"],["🇸🇪","🇫🇷"]],
+  answer:"Juventus"
+},
+{
+  season:"2004/05", team:"Bayern Munich", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇩🇪","🇩🇪","🇩🇪"],["🇩🇪","🇦🇷","🇩🇪","🇫🇷"],["🇵🇪","🇩🇪"]],
+  answer:"Bayern Munich"
+},
+{
+  season:"2005/06", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇲🇽","🇪🇸","🇳🇱"],["🇵🇹","🇪🇸","🇪🇸"],["🇫🇷","🇨🇲","🇧🇷"]],
+  answer:"Barcelona"
+},
+{
+  season:"2005/06", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇫🇷","🏴","🇵🇹","🇫🇷"],["🇬🇭","🇫🇷","🏴"],["🇳🇱","🇨🇮","🏴"]],
+  answer:"Chelsea"
+},
+{
+  season:"2005/06", team:"Lyon", formation:"4-3-3",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇮🇹"],["🇵🇹","🇲🇱","🇫🇷"],["🇫🇷","🇳🇴","🇫🇷"]],
+  answer:"Lyon"
+},
+{
+  season:"2005/06", team:"Inter Milan", formation:"4-4-2",
+  posFlags:[["🇮🇹"],["🇧🇷","🇦🇷","🇦🇷","🇧🇷"],["🇦🇷","🇧🇷","🇨🇱","🇮🇹"],["🇦🇷","🇮🇹"]],
+  answer:"Inter Milan"
+},
+{
+  season:"2005/06", team:"Werder Bremen", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇳🇬","🇩🇪","🇵🇹"],["🇦🇷","🇷🇸","🇩🇪","🇸🇪"],["🇩🇪","🇧🇷"]],
+  answer:"Werder Bremen"
+},
+{
+  season:"2006/07", team:"AC Milan", formation:"4-3-2-1",
+  posFlags:[["🇧🇷"],["🇮🇹","🇮🇹","🇮🇹","🇬🇪"],["🇮🇹","🇮🇹","🇳🇱"],["🇧🇷","🇳🇱"],["🇮🇹"]],
+  answer:"AC Milan"
+},
+{
+  season:"2006/07", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🏴","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇮🇪","🏴"],["🏴","🇫🇷"]],
+  answer:"Manchester United"
+},
+{
+  season:"2006/07", team:"Lyon", formation:"4-3-3",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇮🇹"],["🇵🇹","🇲🇱","🇫🇷"],["🇫🇷","🇳🇴","🇫🇷"]],
+  answer:"Lyon"
+},
+{
+  season:"2006/07", team:"Stuttgart", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇸🇪","🇩🇪","🇫🇷","🇩🇪"],["🇩🇪","🇩🇰","🇩🇪","🇷🇸"],["🇩🇪","🇷🇸"]],
+  answer:"Stuttgart"
+},
+{
+  season:"2006/07", team:"Inter Milan", formation:"4-4-2",
+  posFlags:[["🇮🇹"],["🇦🇷","🇦🇷","🇧🇷","🇮🇹"],["🇵🇹","🇪🇸","🇦🇷","🇮🇹"],["🇸🇪","🇧🇷"]],
+  answer:"Inter Milan"
+},
+{
+  season:"2007/08", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🏴","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇰🇷","🏴"],["🇦🇷","🏴"]],
+  answer:"Manchester United"
+},
+{
+  season:"2007/08", team:"Bayern Munich", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇧🇷","🇧🇪","🇩🇪"],["🇳🇱","🇹🇷","🇫🇷","🇩🇪"],["🇮🇹","🇩🇪"]],
+  answer:"Bayern Munich"
+},
+{
+  season:"2007/08", team:"Inter Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇨🇴","🇦🇷","🇷🇴"],["🇦🇷","🇫🇷","🇷🇸"],["🇵🇹"],["🇸🇪","🇭🇳"]],
+  answer:"Inter Milan"
+},
+{
+  season:"2007/08", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🏴","🇫🇷","🏴","🇧🇷"],["🇨🇮","🇳🇬","🇬🇭"],["🏴","🇫🇷","🇩🇪"]],
+  answer:"Chelsea"
+},
+{
+  season:"2007/08", team:"Roma", formation:"4-2-3-1",
+  posFlags:[["🇮🇹"],["🇩🇪","🇮🇹","🇮🇹","🇧🇷"],["🇧🇷","🇧🇷"],["🇧🇷","🇮🇹","🇮🇹"],["🇮🇹"]],
+  answer:"Roma"
+},
+{
+  season:"2008/09", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇪🇸","🇫🇷"],["🇨🇮","🇪🇸","🇪🇸"],["🇦🇷","🇨🇲","🇫🇷"]],
+  answer:"Barcelona"
+},
+{
+  season:"2008/09", team:"Inter Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇧🇷","🇨🇴","🇦🇷","🇷🇴"],["🇦🇷","🇦🇷","🇷🇸"],["🇷🇸"],["🇸🇪","🇧🇷"]],
+  answer:"Inter Milan"
+},
+{
+  season:"2008/09", team:"Wolfsburg", formation:"4-3-1-2",
+  posFlags:[["🇨🇭"],["🇩🇪","🇮🇹","🇩🇪","🇩🇪"],["🇯🇵","🇧🇷","🇩🇪"],["🇧🇦"],["🇧🇷","🇧🇦"]],
+  answer:"Wolfsburg"
+},
+{
+  season:"2008/09", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🏴","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇮🇪","🏴"],["🏴","🏴"]],
+  answer:"Manchester United"
+},
+{
+  season:"2008/09", team:"Juventus", formation:"4-4-2",
+  posFlags:[["🇮🇹"],["🇮🇹","🇮🇹","🇮🇹","🇧🇷"],["🇧🇷","🇮🇹","🇫🇷","🇫🇷"],["🇫🇷","🇮🇹"]],
+  answer:"Juventus"
+},
+{
+  season:"2009/10", team:"Inter Milan", formation:"4-2-3-1",
+  posFlags:[["🇧🇷"],["🇧🇷","🇧🇷","🇦🇷","🇷🇴"],["🇦🇷","🇦🇷"],["🇳🇱","🇲🇰","🇨🇲"],["🇦🇷"]],
+  answer:"Inter Milan"
+},
+{
+  season:"2009/10", team:"Bayern Munich", formation:"4-4-2",
+  posFlags:[["🇩🇪"],["🇩🇪","🇧🇪","🇦🇷","🇩🇪"],["🇳🇱","🇺🇦","🇩🇪","🇫🇷"],["🇭🇷","🇩🇪"]],
+  answer:"Bayern Munich"
+},
+{
+  season:"2009/10", team:"Chelsea", formation:"4-3-3",
+  posFlags:[["🇨🇿"],["🇷🇸","🏴","🇧🇷","🏴"],["🇩🇪","🏴","🇵🇹"],["🇫🇷","🇨🇮","🇫🇷"]],
+  answer:"Chelsea"
+},
+{
+  season:"2009/10", team:"Bordeaux", formation:"4-4-2",
+  posFlags:[["🇫🇷"],["🇫🇷","🇫🇷","🇧🇷","🇫🇷"],["🇫🇷","🇧🇷","🇧🇷","🇲🇱"],["🇫🇷","🇲🇱"]],
+  answer:"Bordeaux"
+},
+{
+  season:"2009/10", team:"Lyon", formation:"4-3-3",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇮🇹"],["🇵🇹","🇲🇱","🇫🇷"],["🇫🇷","🇳🇴","🇫🇷"]],
+  answer:"Lyon"
+},
+{
+  season:"2010/11", team:"Barcelona", formation:"4-3-3",
+  posFlags:[["🇪🇸"],["🇧🇷","🇪🇸","🇦🇷","🇫🇷"],["🇪🇸","🇪🇸","🇪🇸"],["🇪🇸","🇦🇷","🇪🇸"]],
+  answer:"Barcelona"
+},
+{
+  season:"2010/11", team:"Manchester United", formation:"4-4-2",
+  posFlags:[["🇳🇱"],["🇧🇷","🏴","🇷🇸","🇫🇷"],["🇵🇹","🏴","🇧🇷","🇰🇷"],["🇲🇽","🏴"]],
+  answer:"Manchester United"
+},
+{
+  season:"2010/11", team:"AC Milan", formation:"4-3-1-2",
+  posFlags:[["🇧🇷"],["🇮🇹","🇮🇹","🇮🇹","🇬🇪"],["🇮🇹","🇮🇹","🇳🇱"],["🇩🇰"],["🇸🇪","🇧🇷"]],
+  answer:"AC Milan"
+},
+{
+  season:"2010/11", team:"Borussia Dortmund", formation:"4-2-3-1",
+  posFlags:[["🇩🇪"],["🇵🇱","🇩🇪","🇩🇪","🇩🇪"],["🇩🇪","🇹🇷"],["🇵🇱","🇯🇵","🇩🇪"],["🇵🇾"]],
+  answer:"Borussia Dortmund"
+},
+{
+  season:"2010/11", team:"Marseille", formation:"4-2-3-1",
+  posFlags:[["🇫🇷"],["🇫🇷","🇧🇷","🇫🇷","🇫🇷"],["🇨🇲","🇫🇷"],["🇬🇭","🇫🇷","🇫🇷"],["🇫🇷"]],
+  answer:"Marseille"
+},
+// 2011/12
+{
+  season:"2011/12", team:"Real Madrid", formation:"4-2-3-1",
+  posFlags: [ ["🇪🇸"], ["🇪🇸","🇵🇹","🇪🇸","🇧🇷"], ["🇩🇪","🇪🇸"], ["🇦🇷","🇩🇪","🇵🇹"], ["🇫🇷"] ], answer:"Real Madrid"
+},
+{
+  season:"2011/12", team:"Manchester City", formation:"4-4-2",
+  posFlags: [ ["🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇧🇪","🇫🇷","🇫🇷"], ["🇪🇸","🇮🇪","🇨🇮","🇫🇷"], ["🇦🇷","🇦🇷"] ], answer:"Manchester City"
+},
+{
+  season:"2011/12", team:"Borussia Dortmund", formation:"4-2-3-1",
+  posFlags: [ ["🇩🇪"], ["🇵🇱","🇩🇪","🇩🇪","🇩🇪"], ["🇩🇪","🇩🇪"], ["🇵🇱","🇯🇵","🇩🇪"], ["🇵🇱"] ], answer:"Borussia Dortmund"
+},
+{
+  season:"2011/12", team:"Montpellier", formation:"4-2-3-1",
+  posFlags: [ ["🇫🇷"], ["🇫🇷","🇧🇷","🇫🇷","🇫🇷"], ["🇨🇱","🇫🇷"], ["🇲🇦","🇫🇷","🇫🇷"], ["🇫🇷"] ], answer:"Montpellier"
+},
+{
+  season:"2011/12", team:"AC Milan", formation:"4-3-1-2",
+  posFlags: [ ["🇮🇹"], ["🇮🇹","🇮🇹","🇧🇷","🇮🇹"], ["🇳🇱","🇮🇹","🇬🇭"], ["🇧🇷"], ["🇸🇪","🇧🇷"] ], answer:"AC Milan"
+},
+// 2012/13
+{
+  season:"2012/13", team:"Bayern Munich", formation:"4-2-3-1",
+  posFlags: [ ["🇩🇪"], ["🇦🇹","🇧🇷","🇩🇪","🇩🇪"], ["🇪🇸","🇩🇪"], ["🇳🇱","🇩🇪","🇫🇷"], ["🇭🇷"] ], answer:"Bayern Munich"
+},
+{
+  season:"2012/13", team:"Manchester United", formation:"4-2-3-1",
+  posFlags: [ ["🇪🇸"], ["🇧🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇫🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇳🇱"] ], answer:"Manchester United"
+},
+{
+  season:"2012/13", team:"PSG", formation:"4-4-2",
+  posFlags: [ ["🇮🇹"], ["🇧🇷","🇧🇷","🇮🇹","🇧🇷"], ["🇦🇷","🇮🇹","🇫🇷","🇦🇷"], ["🇸🇪","🇧🇷"] ], answer:"PSG"
+},
+{
+  season:"2012/13", team:"Napoli", formation:"3-4-1-2",
+  posFlags: [ ["🇮🇹"], ["🇮🇹","🇮🇹","🇺🇾"], ["🇮🇹","🇨🇭","🇨🇭","🇨🇴"], ["🇸🇰"], ["🇺🇾","🇲🇰"] ], answer:"Napoli"
+},
+{
+  season:"2012/13", team:"Real Sociedad", formation:"4-3-3",
+  posFlags: [ ["🇨🇱"], ["🇪🇸","🇪🇸","🇪🇸","🇪🇸"], ["🇪🇸","🇪🇸","🇪🇸"], ["🇲🇽","🇪🇸","🇫🇷"] ], answer:"Real Sociedad"
+},
+// 2013/14
+{
+  season:"2013/14", team:"Atletico Madrid", formation:"4-4-2",
+  posFlags: [ ["🇧🇪"], ["🇪🇸","🇺🇾","🇧🇷","🇧🇷"], ["🇪🇸","🇵🇹","🇹🇷","🇪🇸"], ["🇧🇷","🇪🇸"] ], answer:"Atletico Madrid"
+},
+{
+  season:"2013/14", team:"Liverpool", formation:"4-3-3",
+  posFlags: [ ["🇧🇪"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇸🇰","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇺🇾","🏴󠁧󠁢󠁥󠁮󠁧󠁿"] ], answer:"Liverpool"
+},
+{
+  season:"2013/14", team:"Roma", formation:"4-3-3",
+  posFlags: [ ["🇮🇹"], ["🇧🇷","🇲🇦","🇧🇷","🇮🇹"], ["🇧🇦","🇮🇹","🇳🇱"], ["🇨🇮","🇮🇹","🇮🇹"] ], answer:"Roma"
+},
+{
+  season:"2013/14", team:"Bayern Munich", formation:"4-1-4-1",
+  posFlags: [ ["🇩🇪"], ["🇧🇷","🇧🇷","🇩🇪","🇦🇹"], ["🇩🇪"], ["🇳🇱","🇩🇪","🇩🇪","🇫🇷"], ["🇭🇷"] ], answer:"Bayern Munich"
+},
+{
+  season:"2013/14", team:"Manchester City", formation:"4-4-2",
+  posFlags: [ ["🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇦🇷","🇧🇪","🇫🇷","🇷🇸"], ["🇪🇸","🇨🇮","🇧🇷","🇫🇷"], ["🇦🇷","🇧🇦"] ], answer:"Manchester City"
+},
+// 2014/15
+{
+  season:"2014/15", team:"Barcelona", formation:"4-3-3",
+  posFlags: [ ["🇨🇱"], ["🇧🇷","🇪🇸","🇦🇷","🇪🇸"], ["🇭🇷","🇪🇸","🇪🇸"], ["🇦🇷","🇺🇾","🇧🇷"] ], answer:"Barcelona"
+},
+{
+  season:"2014/15", team:"Chelsea", formation:"4-2-3-1",
+  posFlags: [ ["🇧🇪"], ["🇷🇸","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇪🇸"], ["🇷🇸","🇪🇸"], ["🇧🇷","🇪🇸","🇧🇪"], ["🇪🇸"] ], answer:"Chelsea"
+},
+{
+  season:"2014/15", team:"Wolfsburg", formation:"4-2-3-1",
+  posFlags: [ ["🇨🇭"], ["🇵🇹","🇧🇷","🇩🇪","🇨🇭"], ["🇧🇷","🇫🇷"], ["🇧🇷","🇧🇪","🇩🇪"], ["🇳🇱"] ], answer:"Wolfsburg"
+},
+{
+  season:"2014/15", team:"Juventus", formation:"4-3-1-2",
+  posFlags: [ ["🇮🇹"], ["🇨🇭","🇮🇹","🇮🇹","🇫🇷"], ["🇫🇷","🇮🇹","🇨🇱"], ["🇦🇷"], ["🇪🇸","🇦🇷"] ], answer:"Juventus"
+},
+{
+  season:"2014/15", team:"PSG", formation:"4-3-3",
+  posFlags: [ ["🇮🇹"], ["🇧🇷","🇧🇷","🇧🇷","🇧🇷"], ["🇮🇹","🇮🇹","🇫🇷"], ["🇺🇾","🇸🇪","🇦🇷"] ], answer:"PSG"
+},
+// 2015/16
+{
+  season:"2015/16", team:"Leicester City", formation:"4-4-2",
+  posFlags: [ ["🇩🇰"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇩🇪","🇯🇲","🇦🇹"], ["🇩🇿","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇯🇵","🏴󠁧󠁢󠁥󠁮󠁧󠁿"] ], answer:"Leicester City"
+},
+{
+  season:"2015/16", team:"Real Madrid", formation:"4-3-3",
+  posFlags: [ ["🇨🇷"], ["🇧🇷","🇵🇹","🇪🇸","🇧🇷"], ["🇭🇷","🇧🇷","🇩🇪"], ["🏴󠁧󠁢󠁷󠁬󠁳󠁿","🇫🇷","🇵🇹"] ], answer:"Real Madrid"
+},
+{
+  season:"2015/16", team:"Napoli", formation:"4-3-3",
+  posFlags: [ ["🇪🇸"], ["🇦🇱","🇪🇸","🇸🇳","🇩🇿"], ["🇧🇷","🇮🇹","🇸🇰"], ["🇪🇸","🇦🇷","🇮🇹"] ], answer:"Napoli"
+},
+{
+  season:"2015/16", team:"Dortmund", formation:"4-3-3",
+  posFlags: [ ["🇨🇭"], ["🇵🇱","🇬🇷","🇩🇪","🇩🇪"], ["🇩🇪","🇩🇪","🇯🇵"], ["🇩🇪","🇬🇦","🇦🇲"] ], answer:"Dortmund"
+},
+{
+  season:"2015/16", team:"Atletico Madrid", formation:"4-4-2",
+  posFlags: [ ["🇸🇮"], ["🇪🇸","🇺🇾","🇺🇾","🇧🇷"], ["🇪🇸","🇪🇸","🇪🇸","🇪🇸"], ["🇫🇷","🇪🇸"] ], answer:"Atletico Madrid"
+},
+// 2016/17
+{
+  season:"2016/17", team:"AS Monaco", formation:"4-4-2",
+  posFlags: [ ["🇭🇷"], ["🇫🇷","🇵🇱","🇧🇷","🇫🇷"], ["🇵🇹","🇧🇷","🇫🇷","🇫🇷"], ["🇨🇴","🇫🇷"] ], answer:"AS Monaco"
+},
+{
+  season:"2016/17", team:"Chelsea", formation:"3-4-3",
+  posFlags: [ ["🇧🇪"], ["🇪🇸","🇧🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇳🇬","🇫🇷","🇪🇸","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇪🇸","🇪🇸","🇧🇪"] ], answer:"Chelsea"
+},
+{
+  season:"2016/17", team:"RB Leipzig", formation:"4-4-2",
+  posFlags: [ ["🇭🇺"], ["🇩🇪","🇩🇪","🇭🇺","🇩🇪"], ["🇦🇹","🇬🇳","🇸🇪","🇩🇪"], ["🇩🇰","🇩🇪"] ], answer:"RB Leipzig"
+},
+{
+  season:"2016/17", team:"Real Madrid", formation:"4-3-3",
+  posFlags: [ ["🇨🇷"], ["🇪🇸","🇪🇸","🇪🇸","🇧🇷"], ["🇭🇷","🇧🇷","🇩🇪"], ["🇵🇹","🇫🇷","🇪🇸"] ], answer:"Real Madrid"
+},
+{
+  season:"2016/17", team:"Juventus", formation:"4-2-3-1",
+  posFlags: [ ["🇮🇹"], ["🇧🇷","🇮🇹","🇮🇹","🇧🇷"], ["🇧🇦","🇩🇪"], ["🇨🇴","🇦🇷","🇭🇷"], ["🇦🇷"] ], answer:"Juventus"
+},
+// 2017/18
+{
+  season:"2017/18", team:"Liverpool", formation:"4-3-3",
+  posFlags: [ ["🇩🇪"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇭🇷","🇳🇱","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇪🇬","🇧🇷","🇸🇳"] ], answer:"Liverpool"
+},
+{
+  season:"2017/18", team:"Manchester City", formation:"4-3-3",
+  posFlags: [ ["🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇧🇪","🇦🇷","🇫🇷"], ["🇧🇷","🇪🇸","🇧🇪"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇦🇷","🇩🇪"] ], answer:"Manchester City"
+},
+{
+  season:"2017/18", team:"Barcelona", formation:"4-4-2",
+  posFlags: [ ["🇩🇪"], ["🇵🇹","🇪🇸","🇫🇷","🇪🇸"], ["🇭🇷","🇪🇸","🇪🇸","🇪🇸"], ["🇦🇷","🇺🇾"] ], answer:"Barcelona"
+},
+{
+  season:"2017/18", team:"Bayern Munich", formation:"4-3-3",
+  posFlags: [ ["🇩🇪"], ["🇩🇪","🇩🇪","🇩🇪","🇦🇹"], ["🇪🇸","🇨🇴","🇨🇱"], ["🇳🇱","🇵🇱","🇫🇷"] ], answer:"Bayern Munich"
+},
+{
+  season:"2017/18", team:"Napoli", formation:"4-3-3",
+  posFlags: [ ["🇪🇸"], ["🇦🇱","🇪🇸","🇸🇳","🇵🇹"], ["🇧🇷","🇮🇹","🇸🇰"], ["🇪🇸","🇧🇪","🇮🇹"] ], answer:"Napoli"
+},
+// 2018/19
+{
+  season:"2018/19", team:"Ajax", formation:"4-2-3-1",
+  posFlags: [ ["🇨🇲"], ["🇲🇦","🇳🇱","🇳🇱","🇦🇷"], ["🇩🇰","🇳🇱"], ["🇲🇦","🇳🇱","🇷🇸"], ["🇧🇷"] ], answer:"Ajax"
+},
+{
+  season:"2018/19", team:"Liverpool", formation:"4-3-3",
+  posFlags: [ ["🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇨🇲","🇳🇱","🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["🇧🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇳🇱"], ["🇪🇬","🇧🇷","🇸🇳"] ], answer:"Liverpool"
+},
+{
+  season:"2018/19", team:"Eintracht Frankfurt", formation:"3-5-2",
+  posFlags: [ ["🇩🇪"], ["🇦🇷","🇯🇵","🇦🇹"], ["🇳🇱","🇨🇭","🇩🇪","🇨🇭","🇷🇸"], ["🇷🇸","🇫🇷"] ], answer:"Eintracht Frankfurt"
+},
+{
+  season:"2018/19", team:"Atalanta", formation:"3-4-1-2",
+  posFlags: [ ["🇮🇹"], ["🇮🇹","🇦🇱","🇮🇹"], ["🇩🇪","🇳🇱","🇨🇭","🇧🇪"], ["🇸🇮"], ["🇨🇴","🇨🇴"] ], answer:"Atalanta"
+},
+{
+  season:"2018/19", team:"Tottenham", formation:"4-2-3-1",
+  posFlags: [ ["🇫🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇧🇪","🇧🇪","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇫🇷","🇩🇰"], ["🇰🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿"] ], answer:"Tottenham"
+},
+// 2019/20
+{
+  season:"2019/20", team:"Bayern Munich", formation:"4-2-3-1",
+  posFlags: [ ["🇩🇪"], ["🇫🇷","🇦🇹","🇩🇪","🇨🇦"], ["🇪🇸","🇩🇪"], ["🇫🇷","🇩🇪","🇭🇷"], ["🇵🇱"] ], answer:"Bayern Munich"
+},
+{
+  season:"2019/20", team:"PSG", formation:"4-3-3",
+  posFlags: [ ["🇨🇷"], ["🇩🇪","🇧🇷","🇧🇷","🇪🇸"], ["🇮🇹","🇧🇷","🇦🇷"], ["🇦🇷","🇦🇷","🇧🇷"] ], answer:"PSG"
+},
+{
+  season:"2019/20", team:"Sevilla", formation:"4-3-3",
+  posFlags: [ ["🇲🇦"], ["🇪🇸","🇫🇷","🇧🇷","🇪🇸"], ["🇧🇷","🇦🇷","🇯🇴"], ["🇦🇷","🇳🇱","🇪🇸"] ], answer:"Sevilla"
+},
+{
+  season:"2019/20", team:"Liverpool", formation:"4-3-3",
+  posFlags: [ ["🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇳🇱","🏴󠁧󠁢󠁳󠁣󠁴󠁿"], ["🇧🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇳🇱"], ["🇪🇬","🇧🇷","🇸🇳"] ], answer:"Liverpool"
+},
+{
+  season:"2019/20", team:"Atalanta", formation:"3-4-1-2",
+  posFlags: [ ["🇮🇹"], ["🇦🇱","🇮🇹","🇧🇷"], ["🇩🇪","🇳🇱","🇨🇭","🇩🇪"], ["🇦🇷"], ["🇨🇴","🇸🇮"] ], answer:"Atalanta"
+},
+// 2020/21
+{
+  season:"2020/21", team:"Chelsea", formation:"3-4-2-1",
+  posFlags: [ ["🇸🇳"], ["🇪🇸","🇧🇷","🇩🇪"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇮🇹","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇩🇪"], ["🇩🇪"] ], answer:"Chelsea"
+},
+{
+  season:"2020/21", team:"Manchester City", formation:"4-3-3",
+  posFlags: [ ["🇧🇷"], ["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇵🇹","🇺🇦"], ["🇵🇹","🇧🇷","🇩🇪"], ["🇩🇿","🇧🇪","🏴󠁧󠁢󠁥󠁮󠁧󠁿"] ], answer:"Manchester City"
+},
+{
+  season:"2020/21", team:"Inter Milan", formation:"3-5-2",
+  posFlags: [ ["🇸🇮"], ["🇸🇰","🇳🇱","🇮🇹"], ["🇲🇦","🇮🇹","🇩🇰","🇭🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"], ["🇧🇪","🇦🇷"] ], answer:"Inter Milan"
+},
+{
+  season:"2020/21", team:"Lille", formation:"4-4-2",
+  posFlags: [ ["🇫🇷"], ["🇹🇷","🇵🇹","🇳🇱","🇲🇿"], ["🇧🇷","🇫🇷","🇫🇷","🇫🇷"], ["🇨🇦","🇹🇷"] ], answer:"Lille"
+},
+{
+  season:"2020/21", team:"Villarreal", formation:"4-4-2",
+  posFlags: [ ["🇦🇷"], ["🇦🇷","🇪🇸","🇪🇸","🇪🇨"], ["🇳🇬","🇫🇷","🇪🇸","🇪🇸"], ["🇪🇸","🇨🇴"] ], answer:"Villarreal"
+}
+
+// This is for updating arrays in your JS code (if you want to batch replace)
+function updateEnglandFlags(arr) {
+  return arr.map(obj => ({
+    ...obj,
+    posFlags: obj.posFlags.map(row =>
+      row.map(flag => flag === "🏴" ? "🇬🇧" : flag)
+    )
+  }));
+}
+
+// Usage:
+const newEasyLineups = updateEnglandFlags(easyLineups);
+const newHardLineups = updateEnglandFlags(hardLineups);
+
+
+];
+
+
+
+/* ====== QUIZ LOGIC ====== */
+
+let mode = 'normal';  // default
+let lineups = [];
+let currentIndex = 0;
+let score = 0;
+
+function setMode(selectedMode) {
+  mode = selectedMode;
+  document.getElementById('btn-normal').classList.toggle('selected', mode === 'normal');
+  document.getElementById('btn-hard').classList.toggle('selected', mode === 'hard');
+  startQuiz();
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function startQuiz() {
+  if (mode === 'normal') {
+    // Randomly pick one team per season from easyLineups and shuffle
+    const seasons = [...new Set(easyLineups.map(x => x.season))];
+    lineups = seasons.map(season => {
+      const teams = easyLineups.filter(t => t.season === season);
+      return teams[Math.floor(Math.random() * teams.length)];
+    });
+    lineups = shuffle(lineups);
+    document.getElementById('next-btn').style.display = 'inline-block';
+  } else {
+    // Hard mode - shuffle all teams
+    lineups = shuffle([...hardLineups]);
+    document.getElementById('next-btn').style.display = 'none';
+  }
+  currentIndex = 0;
+  score = 0;
+  updateScore();
+  clearFeedback();
+  showCurrentLineup();
+}
+
+function showCurrentLineup() {
+  const quizArea = document.getElementById('quiz-area');
+  clearFeedback();
+
+  if (currentIndex >= lineups.length) {
+    quizArea.innerHTML = `
+      <div><strong>Quiz complete!</strong></div>
+      <div>Your score: ${score} / ${mode === 'normal' ? lineups.length : lineups.length * 2}</div>
+      <button class="mode-btn" onclick="startQuiz()">Restart</button>`;
+    document.getElementById('next-btn').style.display = 'none';
+    return;
+  }
+
+  const lineup = lineups[currentIndex];
+
+  if (mode === 'normal') {
+    // Show season title and flagged formations with country names, show info and 'Next' button
+    quizArea.innerHTML = `
+      <div class="season-title">Season: <b>${lineup.season}</b></div>
+      <div class="lineup" style="margin-bottom:15px;">
+        ${lineup.posFlags.map(row => `<div class="row">${row.map(c => `<div class="pos">${c}</div>`).join('')}</div>`).join('')}
+      </div>
+      <div><strong>Hint:</strong> ${lineup.info || ''}</div>
+      <div><strong>Team:</strong> ${lineup.team}</div>`;
+
+    document.getElementById('next-btn').style.display = 'inline-block';
+  } else {
+    // Hard mode - show flags only, input fields for team and season guesses, no season info, no next btn
+    quizArea.innerHTML = `
+      <div class="lineup" style="margin-bottom:15px;">
+        ${lineup.posFlags.map(row => `<div class="row">${row.map(f => `<div class="pos">${f}</div>`).join('')}</div>`).join('')}
+      </div>
+      <form class="input-row" onsubmit="handleHardModeSubmit(event)">
+        <input type="text" id="team-guess" placeholder="Team name" autocomplete="off" required />
+        <input type="text" id="season-guess" placeholder="Season (e.g., 2008/09)" autocomplete="off" required />
+        <button type="submit">Submit</button>
+      </form>`;
+
+    document.getElementById('next-btn').style.display = 'none';
+  }
+  updateScore();
+}
+
+function nextLineup() {
+  currentIndex++;
+  clearFeedback();
+  showCurrentLineup();
+}
+
+function updateScore() {
+  document.getElementById('scorebox').textContent = `Score: ${score} / ${mode === 'normal' ? lineups.length : lineups.length * 2}`;
+}
+
+function clearFeedback() {
+  const fb = document.getElementById('feedback');
+  if (fb) {
+    fb.textContent = '';
+    fb.className = 'feedback';
+  }
+}
+
+function handleHardModeSubmit(e) {
+  e.preventDefault();
+
+  const lineup = lineups[currentIndex];
+  const teamGuess = document.getElementById('team-guess').value.trim().toLowerCase();
+  const seasonGuessRaw = document.getElementById('season-guess').value.trim();
+  const seasonGuess = seasonGuessRaw.replace(/\s/g, '').toLowerCase();
+  const correctTeam = lineup.answer.toLowerCase();
+  const correctSeason = lineup.season.toLowerCase().replace(/\s/g, '');
+
+  let pointsEarned = 0;
+  let feedbackMsg = '';
+
+  if (teamGuess === correctTeam) {
+    pointsEarned++;
+    feedbackMsg += '✅ Team correct! ';
+  } else {
+    feedbackMsg += `❌ Incorrect team! Correct: ${lineup.answer}. `;
+  }
+
+  if (seasonGuess === correctSeason) {
+    pointsEarned++;
+    feedbackMsg += '✅ Season correct!';
+  } else {
+    feedbackMsg += `❌ Incorrect season! Correct: ${lineup.season}.`;
+  }
+
+  score += pointsEarned;
+  updateScore();
+
+  const fb = document.getElementById('feedback');
+  fb.textContent = feedbackMsg;
+  fb.className = pointsEarned ? 'feedback correct' : 'feedback incorrect';
+
+  // Disable inputs temporarily and move to next question in ~2 seconds
+  const form = e.target;
+  form.querySelectorAll('input, button').forEach(el => (el.disabled = true));
+
+  setTimeout(() => {
+    currentIndex++;
+    clearFeedback();
+    showCurrentLineup();
+  }, 2000);
+}
+
+// Initialize quiz on page load
+window.onload = () => {
+  setMode('normal');
+};
+</script>
+</body>
+</html>
