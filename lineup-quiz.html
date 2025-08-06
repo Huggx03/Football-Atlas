@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Football Atlas Lineup Quiz</title>
+<title>Football Atlas Lineup Quiz - Fixed Row Layout</title>
 <style>
   body {
     background: linear-gradient(135deg,#e0e9f8 0%,#cbe7ff 80%,#d1fde5 100%);
@@ -42,164 +42,117 @@
   .mode-btn:hover {
     background: #0056b3;
   }
+  /* Football pitch style for lineup container */
   .lineup {
-  display: grid;
-  gap: 8px;
-  justify-content: center;
-  margin: 22px auto 10px;
-  position: relative;
-  padding: 20px 14px;              /* modest padding */
-  border: 4px solid #f7f7f7;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
-  box-shadow: 0 3px 16px #0033663a;
-  /* Let height grow naturally but enforce min-height for small lineups */
-  min-height: 180px;
-  /* Add some bottom padding to keep lineup away from bottom border */
-  padding-bottom: 26px;
-}
+    background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
+    border-radius: 18px;
+    padding: 20px 14px 26px;
+    margin: 22px auto 10px;
+    box-shadow: 0 3px 16px #0033663a;
+    border: 4px solid #f7f7f7;
+    position: relative;
+    min-height: 220px;
+    display: grid;          /* grid container */
+    gap: 10px;              /* gap between rows */
+    justify-content: center;
+    /* auto rows height fit content */
+    grid-auto-rows: min-content;
+  }
+  /* Center circle on pitch */
+  .lineup::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #f7f7f7;
+    background: transparent;
+    z-index: 1;
+  }
 
-/* Center circle */
-.lineup:before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 48%;                      /* vertically centered */
-  transform: translate(-50%, -50%);
-  width: 60px;                   /* circle diameter */
-  height: 60px;
-  border: 3px solid #f7f7f7;
-  border-radius: 50%;
-  background: transparent;
-  z-index: 1;
-}
-
-/* Halfway line */
-.lineup:after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%);
-  width: 100%;                  /* full width line */
-  height: 3px;
-  background-color: #f7f7f7;
-  border-radius: 2px;
-  z-index: 1;
-}
-
-/* Player position badges */
-.pos {
-  min-width: 38px;
-  min-height: 38px;
-  padding: 6px 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 20px;
-  font-weight: bold;
-  box-shadow: 0 1px 5px #00551128;
-  margin: 0 5px;
-  color: #177800;
-  border: 2px solid #eeeeee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.12s ease-in-out;
-}
-.pos:hover {
-  background: #fffefd;
-  transform: scale(1.1);
-}  .season-title {
+  /* Halfway line on pitch */
+  .lineup::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 3px;
+    background-color: #f7f7f7;
+    border-radius: 2px;
+    z-index: 1;
+  }
+  /* Each row is a flex container holding players */
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+  /* Player badges */
+  .pos {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 6px 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 1px 5px #00551128;
+    margin: 0 2px;
+    color: #177800;
+    border: 2px solid #eeeeee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: transform 0.12s ease-in-out;
+  }
+  .pos:hover {
+    background: #fffefd;
+    transform: scale(1.1);
+  }
+  .season-title {
     font-size: 21px;
     margin-bottom: 16px;
   }
-  .input-row input[type="text"] {
-    font-size: 17px;
-    border-radius: 9px;
-    border: 1.6px solid #99ccf6;
-    padding: 8px 14px;
-    margin: 0 12px 0 0;
-    width: 140px;
-  }
-  .input-row button {
-    background: #007bff;
-    color: #fff;
-    border: none;
-    padding: 9px 32px;
-    border-radius: 20px;
-    font-size: 18px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  .score,
-  .feedback {
-    font-size: 18px;
-    margin-top: 14px;
-    font-weight: 500;
-  }
-  .score {
-    color: #007b6e;
-  }
-  .feedback.correct {
-    color: #21e678;
-  }
-  .feedback.incorrect {
-    color: #e85e2b;
-  }
-  #next-btn {
-    margin-top: 24px;
-    background: #003366;
-    color: white;
-    border-radius: 28px;
-    padding: 14px 48px;
-    font-size: 18px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-  }
   @media (max-width: 600px) {
-  .lineup {
-    padding: 12px 6px 20px 6px;
-    min-height: 140px;
+    .lineup {
+      min-height: 160px;
+      padding: 12px 6px 20px;
+    }
+    .lineup::before {
+      width: 45px;
+      height: 45px;
+      border-width: 2px;
+    }
+    .lineup::after {
+      height: 2px;
+    }
+    .pos {
+      min-width: 30px;
+      min-height: 30px;
+      font-size: 16px;
+      margin: 0 2px;
+    }
+    .row {
+      gap: 10px;
+    }
   }
-  .lineup:before {
-    width: 45px;
-    height: 45px;
-    border-width: 2px;
-    top: 48%;
-  }
-  .lineup:after {
-    height: 2px;
-  }
-  .pos {
-    min-width: 30px;
-    min-height: 30px;
-    font-size: 16px;
-    margin: 0 4px;
-  }
-  .row {
-    gap: 10px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-  }
-}
 </style>
 </head>
 <body>
   <div class="container">
-    <h2>Guess the Team from their Starting XI by Nationality</h2>
-    <div class="mode-select">
-      <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')">Normal Mode</button>
-      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
-    </div>
-    <div id="quiz-area"></div>
-    <div class="score" id="scorebox"></div>
-    <div class="feedback" id="feedback"></div>
-    <button id="next-btn" style="display:none" onclick="nextLineup()">Next Lineup</button>
+    <h2>Football Atlas Lineup Quiz - Demo</h2>
+    <div class="season-title" id="season-title"></div>
+    <div class="lineup" id="lineup"></div>
   </div>
 
 <script>
-/* ====== DATA: EASY (Normal) & HARD lineup teams ====== */
+  /* ====== DATA: EASY (Normal) & HARD lineup teams ====== */
 
 /* Normal mode: 3 easy teams per season, neutral hints */
 const easyLineups = [
