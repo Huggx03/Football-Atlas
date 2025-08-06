@@ -42,36 +42,72 @@
   .mode-btn:hover {
     background: #0056b3;
   }
-  .lineup {
-    display: grid;
-    gap: 8px;
-    justify-content: center;
-    margin: 22px auto 10px;
-    background: #eef3fa;
-    padding: 22px 10px;
-    border-radius: 17px;
-    box-shadow: 0 2px 9px #007bff22;
-  }
+  .lineup  {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+  margin: 22px auto 10px;
+  /* Football pitch effect */
+  background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
+  border-radius: 18px;
+  box-shadow: 0 3px 16px #0033663a;
+  padding: 30px 14px;
+  position: relative;
+  /* Add a white border simulating field lines */
+  border: 4px solid #f7f7f7;
+  min-height: 270px;
+}
+
+.lineup:before, .lineup:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82%;
+  border-radius: 30px;
+}
+
+.lineup:before {
+  /* center circle */
+  top: 42%;
+  height: 60px;
+  border: 2.5px solid #f7f7f7;
+  background: transparent;
+}
+
+.lineup:after {
+  /* halfway line */
+  top: 49.5%;
+  height: 3px;
+  background: #f7f7f7;
+  z-index: 3;
+}
   .row {
     display: flex;
     justify-content: center;
     gap: 18px;
   }
   .pos {
-    min-width: 44px;
-    min-height: 38px;
-    padding: 6px 0;
-    border-radius: 10px;
-    background: #f9fafe;
-    font-size: 23px;
-    font-weight: 600;
-    box-shadow: 0 1.2px 4px #00336611;
-    margin: 0 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.03em;
-  }
+  min-width: 44px;
+  min-height: 38px;
+  padding: 7px 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  font-size: 22px;
+  font-weight: bold;
+  box-shadow: 0 1px 5px #00551128;
+  margin: 0 4px;
+  color: #177800;
+  border: 2px solid #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+.pos:hover {
+  background: #fffefd;
+  transform: scale(1.08);
+}
   .season-title {
     font-size: 21px;
     margin-bottom: 16px;
