@@ -43,44 +43,78 @@
     background: #0056b3;
   }
   .lineup {
-    background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
-    border-radius: 18px;
-    padding: 20px 14px 26px;
-    margin: 22px auto 10px;
-    box-shadow: 0 3px 16px #0033663a;
-    border: 4px solid #f7f7f7;
-    position: relative;
-    min-height: 220px;
-    display: grid;
-    gap: 10px;
-    justify-content: center;
-    grid-auto-rows: min-content;
-  }
-  .lineup::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid #f7f7f7;
-    background: transparent;
-    z-index: 1;
-  }
-  .lineup::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    height: 3px;
-    background-color: #f7f7f7;
-    border-radius: 2px;
-    z-index: 1;
-  }
+  position: relative;
+  display: grid;
+  gap: 10px;
+  justify-content: center;
+  background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
+  border-radius: 18px;
+  border: 4px solid #f7f7f7;
+  box-shadow: 0 3px 16px #0033663a;
+  padding: 32px 14px 32px 14px;
+  min-height: 240px;
+  margin: 24px auto 10px;
+  grid-auto-rows: min-content;
+  overflow: visible;
+}
+
+/* Penalty box / keeper's area */
+.gk-area {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 54px;
+  border: 3.5px solid #f7f7f7;
+  border-radius: 16px 16px 30px 30px / 35px 35px 43px 43px;
+  background: rgba(255,255,255,0.08);
+  z-index: 2;
+}
+
+/* Draw the goal (as a white rectangle) at the top center */
+.goal {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 13px;
+  background: #fff;
+  border-radius: 4px 4px 10px 10px;
+  box-shadow: 0 3px 8px #6662;
+  z-index: 3;
+  border: 2px solid #d0d0d0;
+}
+
+/* Center circle */
+.lineup::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 55%; /* Lowered to stay away from keeper/penalty area */
+  transform: translate(-50%, -50%);
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 3px solid #f7f7f7;
+  background: none;
+  z-index: 1;
+}
+
+/* Halfway line (lower in the pitch) */
+.lineup::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 56.25%; /* Below the center to avoid keeper */
+  transform: translateX(-50%);
+  width: 100%;
+  height: 3px;
+  background: #f7f7f7;
+  border-radius: 2px;
+  z-index: 1;
+}
   .row {
     display: flex;
     justify-content: center;
