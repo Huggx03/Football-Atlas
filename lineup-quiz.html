@@ -44,24 +44,22 @@
   .mode-btn:hover {
     background: #0056b3;
   }
-
   /* Pitch container */
   .lineup {
     position: relative;
-    display: grid;
-    gap: 10px;
-    justify-content: center;
     background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
     border-radius: 18px;
     border: 4px solid #f7f7f7;
     box-shadow: 0 3px 16px #0033663a;
     padding: 70px 14px 32px 14px; /* Top padding for goal and goalkeeper */
-    min-height: 280px;
     margin: 24px auto 10px;
-    grid-auto-rows: min-content;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px; /* Increased gap between rows for spacing */
     overflow: visible;
   }
-
   /* Center circle */
   .lineup::before {
     content: "";
@@ -88,7 +86,6 @@
     border-radius: 2px;
     z-index: 1;
   }
-
   /* Goal rectangle at top center */
   .goal {
     position: absolute;
@@ -103,7 +100,6 @@
     z-index: 3;
     border: 2px solid #d0d0d0;
   }
-
   /* Goalkeeper area / penalty box */
   .gk-area {
     position: absolute;
@@ -121,14 +117,13 @@
     align-items: center;
     justify-content: flex-end;
   }
-
   /* Player rows */
   .row {
     display: flex;
     justify-content: center;
     gap: 14px;
+    width: 100%;
   }
-
   /* Player flag circle */
   .pos {
     min-width: 38px;
@@ -139,7 +134,7 @@
     font-size: 20px;
     font-weight: bold;
     box-shadow: 0 1px 5px #00551128;
-    margin: 0 2px;
+    margin: 0 6px;
     color: #177800;
     border: 2px solid #eeeeee;
     display: flex;
@@ -159,14 +154,40 @@
     color: #003388;
     box-shadow: 0 2px 8px #0056b355;
   }
-
+  /* Input row */
+  .input-row {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  .input-row input[type="text"] {
+    font-size: 17px;
+    border-radius: 9px;
+    border: 1.6px solid #99ccf6;
+    padding: 8px 14px;
+    width: 140px;
+  }
+  .input-row button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 9px 32px;
+    border-radius: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .input-row button:hover {
+    background: #0056b3;
+  }
   /* Score and feedback styling */
   .score,
   .feedback {
     font-size: 18px;
     margin-top: 14px;
     font-weight: 500;
-    min-height: 28px; /* Reserve space */
+    min-height: 28px; /* Reserve vertical space */
   }
   .score {
     color: #007b6e;
@@ -177,7 +198,6 @@
   .feedback.incorrect {
     color: #e85e2b;
   }
-
   /* Next button */
   #next-btn {
     margin-top: 24px;
@@ -190,15 +210,16 @@
     border: none;
     cursor: pointer;
     align-self: center;
+    display: none; /* Initially hidden */
   }
-
   @media (max-width: 600px) {
     .container {
       padding: 20px 10px 18px 10px;
     }
     .lineup {
-      min-height: 180px;
-      padding: 55px 14px 32px 14px;
+      min-height: 280px;
+      padding: 70px 10px 32px 10px;
+      gap: 24px;
     }
     .lineup::before {
       width: 45px;
@@ -214,7 +235,7 @@
       min-width: 30px;
       min-height: 30px;
       font-size: 16px;
-      margin: 0 2px;
+      margin: 0 4px;
     }
     .row {
       gap: 10px;
@@ -231,6 +252,14 @@
       top: 0;
       border-width: 1.8px;
     }
+    .input-row input[type="text"] {
+      width: 110px;
+      font-size: 15px;
+    }
+    .input-row button {
+      padding: 8px 24px;
+      font-size: 16px;
+    }
     #next-btn {
       padding: 12px 36px;
     }
@@ -245,45 +274,101 @@
       <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
     </div>
 
-    <!-- The Pitch / Lineup container -->
-    <div class="lineup" id="pitch">
+    <div class="lineup" id="pitch" aria-label="Football Pitch">
       <div class="goal"></div>
-      <div class="gk-area">
+      <div class="gk-area" aria-label="Goalkeeper area">
         <span class="pos goalie" title="Goalkeeper">🇩🇪</span>
       </div>
 
-      <div class="row defenders">
+      <div class="row defenders" aria-label="Defenders">
         <span class="pos" title="Defender 1">🇧🇪</span>
         <span class="pos" title="Defender 2">🇫🇷</span>
         <span class="pos" title="Defender 3">🇮🇹</span>
         <span class="pos" title="Defender 4">🇳🇱</span>
       </div>
 
-      <div class="row midfielders">
+      <div class="row midfielders" aria-label="Midfielders">
         <span class="pos" title="Midfielder 1">🇪🇸</span>
         <span class="pos" title="Midfielder 2">🇧🇷</span>
         <span class="pos" title="Midfielder 3">🇬🇧</span>
-        <span class="pos" title="Midfielder 4">🇩🇪</span> <!-- Added the 4th midfielder -->
+        <span class="pos" title="Midfielder 4">🇩🇪</span>
       </div>
 
-      <div class="row forwards">
+      <div class="row forwards" aria-label="Forwards">
         <span class="pos" title="Forward 1">🇵🇹</span>
         <span class="pos" title="Forward 2">🇦🇷</span>
       </div>
     </div>
 
-    <div class="score" id="scorebox"></div>
-    <div class="feedback" id="feedback"></div>
-    <button id="next-btn" style="display:none" onclick="nextLineup()">Next Lineup</button>
+    <div class="input-row" aria-label="Answer input">
+      <input type="text" id="guess" placeholder="Type team name..." aria-label="Team name guess" autocomplete="off" />
+      <button onclick="checkAnswer()">Guess</button>
+    </div>
+
+    <div class="score" id="scorebox" aria-live="polite"></div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+
+    <button id="next-btn" onclick="nextLineup()">Next Lineup</button>
   </div>
 
   <script>
-    /* Placeholder JS functions */
-    function setMode(mode) {
-      alert("Mode set to: " + mode);
+    let mode = 'normal';
+
+    function setMode(selectedMode) {
+      mode = selectedMode;
+      // Update selected button style
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
+      if(selectedMode === 'normal') {
+        document.getElementById('btn-normal').classList.add('selected');
+      } else {
+        document.getElementById('btn-hard').classList.add('selected');
+      }
+      // Placeholder: reload or update lineup according to mode
+      alert("Mode set to: " + selectedMode);
+      resetFeedbackAndScore();
+      nextLineup();  // example reloading lineup
     }
+
+    function checkAnswer() {
+      const guessInput = document.getElementById('guess');
+      const guess = guessInput.value.trim();
+      const feedback = document.getElementById('feedback');
+      const scorebox = document.getElementById('scorebox');
+      if (!guess) {
+        feedback.textContent = "Please enter your guess.";
+        feedback.className = "feedback incorrect";
+        return;
+      }
+      // Placeholder check logic (always correct for demo)
+      feedback.textContent = `You guessed: ${guess}`;
+      feedback.className = "feedback correct";
+      scorebox.textContent = "Score: 1"; // Example
+      document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
     function nextLineup() {
-      alert("Next lineup!");
+      // Placeholder for loading next lineup
+      const feedback = document.getElementById('feedback');
+      const scorebox = document.getElementById('scorebox');
+      const guessInput = document.getElementById('guess');
+
+      // Clear input and feedback for next round
+      guessInput.value = '';
+      feedback.textContent = '';
+      scorebox.textContent = '';
+      document.getElementById('next-btn').style.display = 'none';
+
+      // Example alert
+      alert("Next lineup would load here.");
+
+      // TODO: Implement lineup update logic based on mode
+    }
+
+    function resetFeedbackAndScore() {
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('scorebox').textContent = '';
+      document.getElementById('next-btn').style.display = 'none';
+      document.getElementById('guess').value = '';
     }
   </script>
 </body>
