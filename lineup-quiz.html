@@ -19,6 +19,8 @@
     box-shadow: 0 7px 24px #00336622;
     padding: 38px 20px 26px 20px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
   }
   h2 {
     margin-bottom: 20px;
@@ -53,7 +55,7 @@
     border-radius: 18px;
     border: 4px solid #f7f7f7;
     box-shadow: 0 3px 16px #0033663a;
-    padding: 70px 14px 32px 14px; /* top padding for goal/keeper */
+    padding: 70px 14px 32px 14px; /* Top padding for goal and goalkeeper */
     min-height: 280px;
     margin: 24px auto 10px;
     grid-auto-rows: min-content;
@@ -74,7 +76,6 @@
     background: none;
     z-index: 1;
   }
-
   /* Halfway line aligned with center circle */
   .lineup::after {
     content: "";
@@ -106,7 +107,7 @@
   /* Goalkeeper area / penalty box */
   .gk-area {
     position: absolute;
-    top: 14px; /* just below the goal */
+    top: 14px; /* Just below the goal */
     left: 50%;
     transform: translateX(-50%);
     width: 110px;
@@ -151,7 +152,7 @@
     background: #fffefd;
     transform: scale(1.1);
   }
-  /* Highlight goalkeeper's circle differently */
+  /* Highlight goalkeeper circle */
   .pos.goalie {
     border: 2.5px solid #339cff;
     background: #f3fafd;
@@ -159,34 +160,13 @@
     box-shadow: 0 2px 8px #0056b355;
   }
 
-  /* Other UI */
-  .season-title {
-    font-size: 21px;
-    margin-bottom: 16px;
-  }
-  .input-row input[type="text"] {
-    font-size: 17px;
-    border-radius: 9px;
-    border: 1.6px solid #99ccf6;
-    padding: 8px 14px;
-    margin: 0 12px 0 0;
-    width: 140px;
-  }
-  .input-row button {
-    background: #007bff;
-    color: #fff;
-    border: none;
-    padding: 9px 32px;
-    border-radius: 20px;
-    font-size: 18px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
+  /* Score and feedback styling */
   .score,
   .feedback {
     font-size: 18px;
     margin-top: 14px;
     font-weight: 500;
+    min-height: 28px; /* Reserve space */
   }
   .score {
     color: #007b6e;
@@ -197,6 +177,8 @@
   .feedback.incorrect {
     color: #e85e2b;
   }
+
+  /* Next button */
   #next-btn {
     margin-top: 24px;
     background: #003366;
@@ -207,7 +189,9 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
+    align-self: center;
   }
+
   @media (max-width: 600px) {
     .container {
       padding: 20px 10px 18px 10px;
@@ -247,50 +231,41 @@
       top: 0;
       border-width: 1.8px;
     }
+    #next-btn {
+      padding: 12px 36px;
+    }
   }
 </style>
 </head>
 <body>
   <div class="container">
-  <h2>Title</h2>
-  <div class="mode-select">...mode buttons...</div>
-
-  <div id="quiz-area">
-    <div class="lineup"> 
-      <!-- pitch and players -->
+    <h2>Guess the Team from their Starting XI by Nationality</h2>
+    <div class="mode-select">
+      <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')">Normal Mode</button>
+      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
     </div>
-  </div>
 
-  <div class="score" id="scorebox"></div>
-  <div class="feedback" id="feedback"></div>
-
-  <button id="next-btn"></button>
-</div>
-
-    <!-- The Pitch area -->
+    <!-- The Pitch / Lineup container -->
     <div class="lineup" id="pitch">
       <div class="goal"></div>
       <div class="gk-area">
         <span class="pos goalie" title="Goalkeeper">🇩🇪</span>
       </div>
 
-      <!-- Defenders -->
       <div class="row defenders">
         <span class="pos" title="Defender 1">🇧🇪</span>
-        <span class="pos" title="Defender 2">🇧🇪</span>
-        <span class="pos" title="Defender 3">🇫🇷</span>
-        <span class="pos" title="Defender 4">🇮🇹</span>
+        <span class="pos" title="Defender 2">🇫🇷</span>
+        <span class="pos" title="Defender 3">🇮🇹</span>
+        <span class="pos" title="Defender 4">🇳🇱</span>
       </div>
 
-      <!-- Midfielders -->
       <div class="row midfielders">
         <span class="pos" title="Midfielder 1">🇪🇸</span>
-        <span class="pos" title="Midfielder 2">🇳🇱</span>
-        <span class="pos" title="Midfielder 3">🇩🇪</span>
-        <span class="pos" title="Midfielder 4">🇧🇷</span>
+        <span class="pos" title="Midfielder 2">🇧🇷</span>
+        <span class="pos" title="Midfielder 3">🇬🇧</span>
+        <span class="pos" title="Midfielder 4">🇩🇪</span> <!-- Added the 4th midfielder -->
       </div>
 
-      <!-- Forwards -->
       <div class="row forwards">
         <span class="pos" title="Forward 1">🇵🇹</span>
         <span class="pos" title="Forward 2">🇦🇷</span>
@@ -303,7 +278,7 @@
   </div>
 
   <script>
-    // Placeholder functions for mode and next button, add your quiz logic here
+    /* Placeholder JS functions */
     function setMode(mode) {
       alert("Mode set to: " + mode);
     }
