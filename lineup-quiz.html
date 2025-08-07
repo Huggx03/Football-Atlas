@@ -22,10 +22,23 @@
     display: flex;
     flex-direction: column;
   }
-  h2 {
+
+  /* Header and info text */
+  header {
     margin-bottom: 20px;
-    font-weight: 700;
   }
+  header h1 {
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-size: 24px;
+  }
+  header p {
+    font-size: 14px;
+    color: #007bff;
+    margin: 0;
+    font-weight: 500;
+  }
+
   .mode-select {
     margin-bottom: 28px;
   }
@@ -44,6 +57,7 @@
   .mode-btn:hover {
     background: #0056b3;
   }
+
   /* Pitch container */
   .lineup {
     position: relative;
@@ -51,13 +65,13 @@
     border-radius: 18px;
     border: 4px solid #f7f7f7;
     box-shadow: 0 3px 16px #0033663a;
-    padding: 70px 14px 32px 14px; /* Top padding for goal and goalkeeper */
+    padding: 70px 14px 32px 14px; /* Top padding for goal/goaltender */
     margin: 24px auto 10px;
     min-height: 320px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px; /* Increased gap between rows for spacing */
+    gap: 28px; /* Spacing between player rows */
     overflow: visible;
   }
   /* Center circle */
@@ -74,7 +88,7 @@
     background: none;
     z-index: 1;
   }
-  /* Halfway line aligned with center circle */
+  /* Halfway line */
   .lineup::after {
     content: "";
     position: absolute;
@@ -86,7 +100,7 @@
     border-radius: 2px;
     z-index: 1;
   }
-  /* Goal rectangle at top center */
+  /* Goal */
   .goal {
     position: absolute;
     top: 0;
@@ -100,10 +114,10 @@
     z-index: 3;
     border: 2px solid #d0d0d0;
   }
-  /* Goalkeeper area / penalty box */
+  /* Goalkeeper / Penalty box */
   .gk-area {
     position: absolute;
-    top: 14px; /* Just below the goal */
+    top: 14px; /* just below goal */
     left: 50%;
     transform: translateX(-50%);
     width: 110px;
@@ -147,13 +161,14 @@
     background: #fffefd;
     transform: scale(1.1);
   }
-  /* Highlight goalkeeper circle */
+  /* Highlight goalkeeper */
   .pos.goalie {
     border: 2.5px solid #339cff;
     background: #f3fafd;
     color: #003388;
     box-shadow: 0 2px 8px #0056b355;
   }
+
   /* Input row */
   .input-row {
     margin-top: 20px;
@@ -181,13 +196,14 @@
   .input-row button:hover {
     background: #0056b3;
   }
-  /* Score and feedback styling */
+
+  /* Score and feedback */
   .score,
   .feedback {
     font-size: 18px;
     margin-top: 14px;
     font-weight: 500;
-    min-height: 28px; /* Reserve vertical space */
+    min-height: 28px; /* reserve space */
   }
   .score {
     color: #007b6e;
@@ -198,6 +214,7 @@
   .feedback.incorrect {
     color: #e85e2b;
   }
+
   /* Next button */
   #next-btn {
     margin-top: 24px;
@@ -210,8 +227,20 @@
     border: none;
     cursor: pointer;
     align-self: center;
-    display: none; /* Initially hidden */
+    display: none; /* hidden initially */
   }
+
+  /* Info section */
+  .info-section {
+    font-size: 14px;
+    color: #555;
+    margin-top: 18px;
+  }
+  .info-section span {
+    display: inline-block;
+    margin: 0 8px;
+  }
+
   @media (max-width: 600px) {
     .container {
       padding: 20px 10px 18px 10px;
@@ -263,70 +292,94 @@
     #next-btn {
       padding: 12px 36px;
     }
+    .info-section {
+      font-size: 12px;
+      margin-top: 14px;
+    }
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Guess the Team from their Starting XI by Nationality</h2>
-    <div class="mode-select">
-      <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')">Normal Mode</button>
-      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
+  <div class="container" role="main" aria-label="Football Atlas Lineup Quiz Container">
+
+    <header>
+      <h1>Football Atlas Lineup Quiz</h1>
+      <p>A challenge to guess the team from their starting XI by nationality.</p>
+    </header>
+
+    <!-- Info section: contact, rights, question count -->
+    <div class="info-section" aria-label="Quiz Information">
+      <span>Contact: info@footballatlas.com</span>
+      <span>© 2025 Football Atlas</span>
+      <span>Number of questions: 10</span>
     </div>
 
-    <div class="lineup" id="pitch" aria-label="Football Pitch">
+    <div class="mode-select" role="group" aria-label="Game mode selection">
+      <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')" aria-pressed="true">Normal Mode</button>
+      <button class="mode-btn" id="btn-hard" onclick="setMode('hard')" aria-pressed="false">Hard Mode</button>
+    </div>
+
+    <div class="lineup" id="pitch" aria-label="Football pitch lineup">
       <div class="goal"></div>
       <div class="gk-area" aria-label="Goalkeeper area">
         <span class="pos goalie" title="Goalkeeper">🇩🇪</span>
       </div>
-
       <div class="row defenders" aria-label="Defenders">
         <span class="pos" title="Defender 1">🇧🇪</span>
         <span class="pos" title="Defender 2">🇫🇷</span>
         <span class="pos" title="Defender 3">🇮🇹</span>
         <span class="pos" title="Defender 4">🇳🇱</span>
       </div>
-
       <div class="row midfielders" aria-label="Midfielders">
         <span class="pos" title="Midfielder 1">🇪🇸</span>
         <span class="pos" title="Midfielder 2">🇧🇷</span>
         <span class="pos" title="Midfielder 3">🇬🇧</span>
         <span class="pos" title="Midfielder 4">🇩🇪</span>
       </div>
-
       <div class="row forwards" aria-label="Forwards">
         <span class="pos" title="Forward 1">🇵🇹</span>
         <span class="pos" title="Forward 2">🇦🇷</span>
       </div>
     </div>
 
-    <div class="input-row" aria-label="Answer input">
-      <input type="text" id="guess" placeholder="Type team name..." aria-label="Team name guess" autocomplete="off" />
-      <button onclick="checkAnswer()">Guess</button>
+    <div class="input-row" aria-label="Answer input area">
+      <input type="text" id="guess" aria-label="Type your guess" placeholder="Type team name..." autocomplete="off" />
+      <button onclick="checkAnswer()" aria-label="Submit guess">Guess</button>
     </div>
 
-    <div class="score" id="scorebox" aria-live="polite"></div>
-    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <div class="score" id="scorebox" aria-live="polite" aria-atomic="true"></div>
+    <div class="feedback" id="feedback" aria-live="polite" aria-atomic="true"></div>
 
-    <button id="next-btn" onclick="nextLineup()">Next Lineup</button>
+    <button id="next-btn" onclick="nextLineup()" aria-label="Next lineup">Next Lineup</button>
+
   </div>
 
   <script>
     let mode = 'normal';
+    let score = 0;
+    let questionCount = 0;
+    const maxQuestions = 10;
 
     function setMode(selectedMode) {
       mode = selectedMode;
-      // Update selected button style
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
+      const normalBtn = document.getElementById('btn-normal');
+      const hardBtn = document.getElementById('btn-hard');
+
+      normalBtn.classList.remove('selected');
+      normalBtn.setAttribute('aria-pressed', 'false');
+      hardBtn.classList.remove('selected');
+      hardBtn.setAttribute('aria-pressed', 'false');
+
       if(selectedMode === 'normal') {
-        document.getElementById('btn-normal').classList.add('selected');
+        normalBtn.classList.add('selected');
+        normalBtn.setAttribute('aria-pressed', 'true');
       } else {
-        document.getElementById('btn-hard').classList.add('selected');
+        hardBtn.classList.add('selected');
+        hardBtn.setAttribute('aria-pressed', 'true');
       }
-      // Placeholder: reload or update lineup according to mode
-      alert("Mode set to: " + selectedMode);
+
       resetFeedbackAndScore();
-      nextLineup();  // example reloading lineup
+      loadNewLineup();
     }
 
     function checkAnswer() {
@@ -334,42 +387,71 @@
       const guess = guessInput.value.trim();
       const feedback = document.getElementById('feedback');
       const scorebox = document.getElementById('scorebox');
+      const nextBtn = document.getElementById('next-btn');
+
       if (!guess) {
         feedback.textContent = "Please enter your guess.";
         feedback.className = "feedback incorrect";
         return;
       }
-      // Placeholder check logic (always correct for demo)
-      feedback.textContent = `You guessed: ${guess}`;
-      feedback.className = "feedback correct";
-      scorebox.textContent = "Score: 1"; // Example
-      document.getElementById('next-btn').style.display = 'inline-block';
+
+      // Placeholder: hardcoded correct answer for demo
+      // Replace this logic with your real answer checking
+      const correctAnswer = "Germany";
+
+      if (guess.toLowerCase() === correctAnswer.toLowerCase()) {
+        feedback.textContent = "Correct!";
+        feedback.className = "feedback correct";
+        score++;
+      } else {
+        feedback.textContent = `Incorrect! The correct team was ${correctAnswer}.`;
+        feedback.className = "feedback incorrect";
+      }
+      questionCount++;
+      scorebox.textContent = `Score: ${score} / ${questionCount}`;
+
+      guessInput.disabled = true;
+      nextBtn.style.display = 'inline-block';
+
+      // Optionally disable guess button until next
+      document.querySelector('.input-row button').disabled = true;
     }
 
     function nextLineup() {
-      // Placeholder for loading next lineup
-      const feedback = document.getElementById('feedback');
-      const scorebox = document.getElementById('scorebox');
-      const guessInput = document.getElementById('guess');
-
-      // Clear input and feedback for next round
-      guessInput.value = '';
-      feedback.textContent = '';
-      scorebox.textContent = '';
-      document.getElementById('next-btn').style.display = 'none';
-
-      // Example alert
-      alert("Next lineup would load here.");
-
-      // TODO: Implement lineup update logic based on mode
+      if(questionCount >= maxQuestions) {
+        alert(`Quiz complete! Your final score is ${score} out of ${maxQuestions}.`);
+        return;
+      }
+      resetFeedbackAndScore();
+      loadNewLineup();
     }
 
     function resetFeedbackAndScore() {
       document.getElementById('feedback').textContent = '';
       document.getElementById('scorebox').textContent = '';
       document.getElementById('next-btn').style.display = 'none';
-      document.getElementById('guess').value = '';
+      const guessInput = document.getElementById('guess');
+      guessInput.value = '';
+      guessInput.disabled = false;
+      document.querySelector('.input-row button').disabled = false;
     }
+
+    function loadNewLineup() {
+      // Placeholder function: here you’d load new lineup data based on mode
+      // For demo, we keep same lineup and goalkeeper.
+      // Replace this with your dynamic quiz logic.
+      console.log(`Loading lineup for mode: ${mode}`);
+
+      // Example: Update lineup players or clear form as needed
+
+      // If you want, clear guess box here:
+      resetFeedbackAndScore();
+    }
+
+    // Initialization on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      setMode('normal'); // Default mode
+    });
   </script>
 </body>
 </html>
