@@ -5,193 +5,249 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Football Atlas Lineup Quiz</title>
 <style>
-body {
-  background: linear-gradient(135deg,#e0e9f8 0%,#cbe7ff 80%,#d1fde5 100%);
-  font-family: 'Segoe UI', Arial, sans-serif;
-  margin: 0; padding: 0; min-height: 100vh;
-  color: #003366;
-}
-.container {
-  max-width: 540px;
-  margin: 48px auto 36px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 7px 24px #00336622;
-  padding: 38px 20px 26px 20px;
-  text-align: center;
-}
-h2 {
-  margin-bottom: 20px;
-  font-weight: 700;
-}
-.mode-select {
-  margin-bottom: 28px;
-}
-.mode-btn {
-  font-size: 18px;
-  padding: 10px 36px;
-  margin: 0 8px;
-  border-radius: 24px;
-  background: #007bff;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-.mode-btn.selected,
-.mode-btn:hover {
-  background: #0056b3;
-}
-.lineup::before {
-  top: 55%; /* Center circle position */
-}
-.lineup::after {
-  top: 55%; /* Halfway line aligned with center circle */
-  width: 100%; 
-  height: 3px;
-  background: #f7f7f7;
-  border-radius: 2px;
-  z-index: 1;
-}
-.goal {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 48px;
-  height: 13px;
-  background: #fff;
-  border-radius: 4px 4px 10px 10px;
-  box-shadow: 0 3px 8px #6662;
-  z-index: 3;
-  border: 2px solid #d0d0d0;
-}
-.gk-area {
-  position: absolute;
-  top: 14px; /* Below the goal */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 54px;
-  border: 3.5px solid #f7f7f7;
-  border-radius: 16px 16px 30px 30px / 35px 35px 43px 43px;
-  background: rgba(255,255,255,0.08);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-}
-.lineup {
-  padding-top: 70px; /* Enough padding for goal and gk area */
-}
-.row {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-}
-.pos {
-  min-width: 38px;
-  min-height: 38px;
-  padding: 6px 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 20px;
-  font-weight: bold;
-  box-shadow: 0 1px 5px #00551128;
-  margin: 0 2px;
-  color: #177800;
-  border: 2px solid #eeeeee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-  transition: transform 0.12s ease-in-out;
-}
-.pos:hover {
-  background: #fffefd;
-  transform: scale(1.1);
-}
-.pos.goalie {
-  border: 2.5px solid #339cff;
-  background: #f3fafd;
-  color: #003388;
-  box-shadow: 0 2px 8px #0056b355;
-}
-.season-title {
-  font-size: 21px;
-  margin-bottom: 16px;
-}
-.input-row input[type="text"] {
-  font-size: 17px;
-  border-radius: 9px;
-  border: 1.6px solid #99ccf6;
-  padding: 8px 14px;
-  margin: 0 12px 0 0;
-  width: 140px;
-}
-.input-row button {
-  background: #007bff;
-  color: #fff;
-  border: none;
-  padding: 9px 32px;
-  border-radius: 20px;
-  font-size: 18px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-.score,
-.feedback {
-  font-size: 18px;
-  margin-top: 14px;
-  font-weight: 500;
-}
-.score {
-  color: #007b6e;
-}
-.feedback.correct {
-  color: #21e678;
-}
-.feedback.incorrect {
-  color: #e85e2b;
-}
-#next-btn {
-  margin-top: 24px;
-  background: #003366;
-  color: white;
-  border-radius: 28px;
-  padding: 14px 48px;
-  font-size: 18px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-}
-@media (max-width: 600px) {
+  body {
+    background: linear-gradient(135deg,#e0e9f8 0%,#cbe7ff 80%,#d1fde5 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0; padding: 0; min-height: 100vh;
+    color: #003366;
+  }
   .container {
-    padding: 20px 10px 18px 10px;
+    max-width: 540px;
+    margin: 48px auto 36px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 7px 24px #00336622;
+    padding: 38px 20px 26px 20px;
+    text-align: center;
   }
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+  .mode-select {
+    margin-bottom: 28px;
+  }
+  .mode-btn {
+    font-size: 18px;
+    padding: 10px 36px;
+    margin: 0 8px;
+    border-radius: 24px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .mode-btn.selected,
+  .mode-btn:hover {
+    background: #0056b3;
+  }
+
+  /* Pitch container */
   .lineup {
-    min-height: 160px;
-    padding: 32px 6px 20px;
-  }
-  .lineup::before {
-    width: 45px;
-    height: 45px;
-    border-width: 2px;
-  }
-  .lineup::after {
-    height: 2px;
-  }
-  .pos {
-    min-width: 30px;
-    min-height: 30px;
-    font-size: 16px;
-    margin: 0 2px;
-  }
-  .row {
+    position: relative;
+    display: grid;
     gap: 10px;
+    justify-content: center;
+    background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
+    border-radius: 18px;
+    border: 4px solid #f7f7f7;
+    box-shadow: 0 3px 16px #0033663a;
+    padding: 70px 14px 32px 14px; /* top padding for goal/keeper */
+    min-height: 280px;
+    margin: 24px auto 10px;
+    grid-auto-rows: min-content;
+    overflow: visible;
   }
-}
+
+  /* Center circle */
+  .lineup::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    transform: translate(-50%, -50%);
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 3px solid #f7f7f7;
+    background: none;
+    z-index: 1;
+  }
+
+  /* Halfway line aligned with center circle */
+  .lineup::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 55%;
+    width: 100%;
+    height: 3px;
+    background: #f7f7f7;
+    border-radius: 2px;
+    z-index: 1;
+  }
+
+  /* Goal rectangle at top center */
+  .goal {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 13px;
+    background: #fff;
+    border-radius: 4px 4px 10px 10px;
+    box-shadow: 0 3px 8px #6662;
+    z-index: 3;
+    border: 2px solid #d0d0d0;
+  }
+
+  /* Goalkeeper area / penalty box */
+  .gk-area {
+    position: absolute;
+    top: 14px; /* just below the goal */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 54px;
+    border: 3.5px solid #f7f7f7;
+    border-radius: 16px 16px 30px 30px / 35px 35px 43px 43px;
+    background: rgba(255,255,255,0.08);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  /* Player rows */
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  /* Player flag circle */
+  .pos {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 6px 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 1px 5px #00551128;
+    margin: 0 2px;
+    color: #177800;
+    border: 2px solid #eeeeee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: transform 0.12s ease-in-out;
+  }
+  .pos:hover {
+    background: #fffefd;
+    transform: scale(1.1);
+  }
+  /* Highlight goalkeeper's circle differently */
+  .pos.goalie {
+    border: 2.5px solid #339cff;
+    background: #f3fafd;
+    color: #003388;
+    box-shadow: 0 2px 8px #0056b355;
+  }
+
+  /* Other UI */
+  .season-title {
+    font-size: 21px;
+    margin-bottom: 16px;
+  }
+  .input-row input[type="text"] {
+    font-size: 17px;
+    border-radius: 9px;
+    border: 1.6px solid #99ccf6;
+    padding: 8px 14px;
+    margin: 0 12px 0 0;
+    width: 140px;
+  }
+  .input-row button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 9px 32px;
+    border-radius: 20px;
+    font-size: 18px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .score,
+  .feedback {
+    font-size: 18px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .score {
+    color: #007b6e;
+  }
+  .feedback.correct {
+    color: #21e678;
+  }
+  .feedback.incorrect {
+    color: #e85e2b;
+  }
+  #next-btn {
+    margin-top: 24px;
+    background: #003366;
+    color: white;
+    border-radius: 28px;
+    padding: 14px 48px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    .container {
+      padding: 20px 10px 18px 10px;
+    }
+    .lineup {
+      min-height: 180px;
+      padding: 55px 14px 32px 14px;
+    }
+    .lineup::before {
+      width: 45px;
+      height: 45px;
+      border-width: 2px;
+      top: 55%;
+    }
+    .lineup::after {
+      height: 2px;
+      top: 55%;
+    }
+    .pos {
+      min-width: 30px;
+      min-height: 30px;
+      font-size: 16px;
+      margin: 0 2px;
+    }
+    .row {
+      gap: 10px;
+    }
+    .gk-area {
+      width: 90px;
+      height: 44px;
+      top: 12px;
+      border-width: 3px;
+    }
+    .goal {
+      width: 40px;
+      height: 11px;
+      top: 0;
+      border-width: 1.8px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -201,15 +257,54 @@ h2 {
       <button class="mode-btn selected" id="btn-normal" onclick="setMode('normal')">Normal Mode</button>
       <button class="mode-btn" id="btn-hard" onclick="setMode('hard')">Hard Mode</button>
     </div>
-    <div id="quiz-area"></div>
+
+    <!-- The Pitch area -->
+    <div class="lineup" id="pitch">
+      <div class="goal"></div>
+      <div class="gk-area">
+        <span class="pos goalie" title="Goalkeeper">🇩🇪</span>
+      </div>
+
+      <!-- Defenders -->
+      <div class="row defenders">
+        <span class="pos" title="Defender 1">🇧🇪</span>
+        <span class="pos" title="Defender 2">🇧🇪</span>
+        <span class="pos" title="Defender 3">🇫🇷</span>
+        <span class="pos" title="Defender 4">🇮🇹</span>
+      </div>
+
+      <!-- Midfielders -->
+      <div class="row midfielders">
+        <span class="pos" title="Midfielder 1">🇪🇸</span>
+        <span class="pos" title="Midfielder 2">🇳🇱</span>
+        <span class="pos" title="Midfielder 3">🇩🇪</span>
+        <span class="pos" title="Midfielder 4">🇧🇷</span>
+      </div>
+
+      <!-- Forwards -->
+      <div class="row forwards">
+        <span class="pos" title="Forward 1">🇵🇹</span>
+        <span class="pos" title="Forward 2">🇦🇷</span>
+      </div>
+    </div>
+
     <div class="score" id="scorebox"></div>
     <div class="feedback" id="feedback"></div>
     <button id="next-btn" style="display:none" onclick="nextLineup()">Next Lineup</button>
   </div>
+
+  <script>
+    // Placeholder functions for mode and next button, add your quiz logic here
+    function setMode(mode) {
+      alert("Mode set to: " + mode);
+    }
+    function nextLineup() {
+      alert("Next lineup!");
+    }
+  </script>
 </body>
 </html>
 
-<script>  
   /* ====== DATA: EASY (Normal) & HARD lineup teams ====== */
 
 /* Normal mode: 3 easy teams per season, neutral hints */
