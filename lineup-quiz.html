@@ -42,39 +42,17 @@ h2 {
 .mode-btn:hover {
   background: #0056b3;
 }
-.lineup {
-  position: relative;
-  display: grid;
-  gap: 10px;
-  justify-content: center;
-  background: linear-gradient(135deg, #3bb24b 60%, #176438 100%);
-  border-radius: 18px;
-  border: 4px solid #f7f7f7;
-  box-shadow: 0 3px 16px #0033663a;
-  padding: 70px 14px 32px 14px;
-  min-height: 240px;
-  margin: 24px auto 10px;
-  grid-auto-rows: min-content;
-  overflow: visible;
+.lineup::before {
+  top: 55%; /* Center circle position */
 }
-/* Goalkeeper area */
-.gk-area {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 110px;
-  height: 54px;
-  border: 3.5px solid #f7f7f7;
-  border-radius: 16px 16px 30px 30px / 35px 35px 43px 43px;
-  background: rgba(255,255,255,0.08);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+.lineup::after {
+  top: 55%; /* Halfway line aligned with center circle */
+  width: 100%; 
+  height: 3px;
+  background: #f7f7f7;
+  border-radius: 2px;
+  z-index: 1;
 }
-/* Goal rectangle */
 .goal {
   position: absolute;
   top: 0;
@@ -88,32 +66,24 @@ h2 {
   z-index: 3;
   border: 2px solid #d0d0d0;
 }
-/* Center circle */
-.lineup::before {
-  content: "";
+.gk-area {
   position: absolute;
+  top: 14px; /* Below the goal */
   left: 50%;
-  top: 55%;
-  transform: translate(-50%, -50%);
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  border: 3px solid #f7f7f7;
-  background: none;
-  z-index: 1;
-}
-/* Halfway line, lower down */
-.lineup::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 65%;
   transform: translateX(-50%);
-  width: 100%;
-  height: 3px;
-  background: #f7f7f7;
-  border-radius: 2px;
-  z-index: 1;
+  width: 110px;
+  height: 54px;
+  border: 3.5px solid #f7f7f7;
+  border-radius: 16px 16px 30px 30px / 35px 35px 43px 43px;
+  background: rgba(255,255,255,0.08);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.lineup {
+  padding-top: 70px; /* Enough padding for goal and gk area */
 }
 .row {
   display: flex;
