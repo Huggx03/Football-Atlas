@@ -22,8 +22,6 @@
     display: flex;
     flex-direction: column;
   }
-
-  /* Header and info text */
   header {
     margin-bottom: 20px;
   }
@@ -38,7 +36,6 @@
     margin: 0;
     font-weight: 500;
   }
-
   .mode-select {
     margin-bottom: 28px;
   }
@@ -57,7 +54,25 @@
   .mode-btn:hover {
     background: #0056b3;
   }
-
+  /* Team selector */
+  .team-select {
+    margin-bottom: 28px;
+  }
+  .team-btn {
+    font-size: 16px;
+    padding: 8px 24px;
+    margin: 0 6px;
+    border-radius: 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .team-btn.selected,
+  .team-btn:hover {
+    background: #1e7e34;
+  }
   /* Pitch container */
   .lineup {
     position: relative;
@@ -65,13 +80,13 @@
     border-radius: 18px;
     border: 4px solid #f7f7f7;
     box-shadow: 0 3px 16px #0033663a;
-    padding: 70px 14px 32px 14px; /* Top padding for goal/goaltender */
+    padding: 70px 14px 32px 14px; /* padding for goal & keeper space */
     margin: 24px auto 10px;
     min-height: 320px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 28px; /* Spacing between player rows */
+    gap: 28px; /* space between rows */
     overflow: visible;
   }
   /* Center circle */
@@ -137,6 +152,7 @@
     justify-content: center;
     gap: 14px;
     width: 100%;
+    max-width: 460px;
   }
   /* Player flag circle */
   .pos {
@@ -168,7 +184,6 @@
     color: #003388;
     box-shadow: 0 2px 8px #0056b355;
   }
-
   /* Input row */
   .input-row {
     margin-top: 20px;
@@ -196,7 +211,6 @@
   .input-row button:hover {
     background: #0056b3;
   }
-
   /* Score and feedback */
   .score,
   .feedback {
@@ -214,7 +228,6 @@
   .feedback.incorrect {
     color: #e85e2b;
   }
-
   /* Next button */
   #next-btn {
     margin-top: 24px;
@@ -228,8 +241,11 @@
     cursor: pointer;
     align-self: center;
     display: none; /* hidden initially */
+    transition: background 0.3s ease;
   }
-
+  #next-btn:hover {
+    background: #00224d;
+  }
   /* Info section */
   .info-section {
     font-size: 14px;
@@ -240,7 +256,6 @@
     display: inline-block;
     margin: 0 8px;
   }
-
   @media (max-width: 600px) {
     .container {
       padding: 20px 10px 18px 10px;
@@ -307,7 +322,6 @@
       <p>A challenge to guess the team from their starting XI by nationality.</p>
     </header>
 
-    <!-- Info section: contact, rights, question count -->
     <div class="info-section" aria-label="Quiz Information">
       <span>Contact: info@footballatlas.com</span>
       <span>© 2025 Football Atlas</span>
@@ -319,26 +333,15 @@
       <button class="mode-btn" id="btn-hard" onclick="setMode('hard')" aria-pressed="false">Hard Mode</button>
     </div>
 
+    <div class="team-select" role="group" aria-label="Select team to guess">
+      <!-- Team buttons will be injected here by JS -->
+    </div>
+
     <div class="lineup" id="pitch" aria-label="Football pitch lineup">
+      <!-- Pitch and players rendered by JS -->
       <div class="goal"></div>
       <div class="gk-area" aria-label="Goalkeeper area">
-        <span class="pos goalie" title="Goalkeeper">🇩🇪</span>
-      </div>
-      <div class="row defenders" aria-label="Defenders">
-        <span class="pos" title="Defender 1">🇧🇪</span>
-        <span class="pos" title="Defender 2">🇫🇷</span>
-        <span class="pos" title="Defender 3">🇮🇹</span>
-        <span class="pos" title="Defender 4">🇳🇱</span>
-      </div>
-      <div class="row midfielders" aria-label="Midfielders">
-        <span class="pos" title="Midfielder 1">🇪🇸</span>
-        <span class="pos" title="Midfielder 2">🇧🇷</span>
-        <span class="pos" title="Midfielder 3">🇬🇧</span>
-        <span class="pos" title="Midfielder 4">🇩🇪</span>
-      </div>
-      <div class="row forwards" aria-label="Forwards">
-        <span class="pos" title="Forward 1">🇵🇹</span>
-        <span class="pos" title="Forward 2">🇦🇷</span>
+        <span class="pos goalie" title="Goalkeeper">⚽</span> <!-- placeholder -->
       </div>
     </div>
 
@@ -354,105 +357,211 @@
 
   </div>
 
-  <script>
-    let mode = 'normal';
-    let score = 0;
-    let questionCount = 0;
-    const maxQuestions = 10;
-
-    function setMode(selectedMode) {
-      mode = selectedMode;
-      const normalBtn = document.getElementById('btn-normal');
-      const hardBtn = document.getElementById('btn-hard');
-
-      normalBtn.classList.remove('selected');
-      normalBtn.setAttribute('aria-pressed', 'false');
-      hardBtn.classList.remove('selected');
-      hardBtn.setAttribute('aria-pressed', 'false');
-
-      if(selectedMode === 'normal') {
-        normalBtn.classList.add('selected');
-        normalBtn.setAttribute('aria-pressed', 'true');
-      } else {
-        hardBtn.classList.add('selected');
-        hardBtn.setAttribute('aria-pressed', 'true');
+<script>
+  // Sample data: list of teams with mode variants (normal/hard)
+  const teamsData = {
+    normal: [
+      {
+        name: "Germany",
+        goalkeeper: "🇩🇪",
+        defenders: ["🇧🇪", "🇫🇷", "🇮🇹", "🇳🇱"],
+        midfielders: ["🇪🇸", "🇧🇷", "🇬🇧", "🇩🇪"],
+        forwards: ["🇵🇹", "🇦🇷"],
+      },
+      {
+        name: "France",
+        goalkeeper: "🇫🇷",
+        defenders: ["🇫🇷", "🇧🇪", "🇪🇸", "🇮🇹"],
+        midfielders: ["🇩🇪", "🇳🇱", "🇪🇸", "🇬🇧"],
+        forwards: ["🇧🇷", "🇵🇹"],
       }
+    ],
+    hard: [
+      {
+        name: "Belgium",
+        goalkeeper: "🇧🇪",
+        defenders: ["🇧🇪", "🇳🇱", "🇫🇷", "🇮🇹"],
+        midfielders: ["🇪🇸", "🇧🇷", "🇩🇪", "🇬🇧"],
+        forwards: ["🇵🇹", "🇦🇷"],
+      },
+      {
+        name: "Brazil",
+        goalkeeper: "🇧🇷",
+        defenders: ["🇧🇷", "🇪🇸", "🇮🇹", "🇫🇷"],
+        midfielders: ["🇩🇪", "🇳🇱", "🇧🇪", "🇬🇧"],
+        forwards: ["🇵🇹", "🇦🇷"],
+      },
+    ],
+  };
 
-      resetFeedbackAndScore();
-      loadNewLineup();
+  let currentMode = 'normal';
+  let currentTeamIndex = 0;
+  let score = 0;
+  let questionCount = 0;
+  const maxQuestions = 10;
+
+  const pitch = document.getElementById('pitch');
+  const scorebox = document.getElementById('scorebox');
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('next-btn');
+  const guessInput = document.getElementById('guess');
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const teamSelectDiv = document.querySelector('.team-select');
+
+  // Helper: render the team lineup inside the pitch container
+  function renderLineup(team) {
+    // Clear all children except .goal and .gk-area:
+    // We'll build player rows anew
+    // Keep .goal and .gk-area in place to avoid re-creating styles
+    // Remove old rows:
+    [...pitch.querySelectorAll('.row')].forEach(row => row.remove());
+
+    // Update goalkeeper emoji
+    let gkSpan = pitch.querySelector('.gk-area .pos.goalie');
+    if(!gkSpan) {
+      gkSpan = document.createElement('span');
+      gkSpan.className = 'pos goalie';
+      pitch.querySelector('.gk-area').appendChild(gkSpan);
     }
+    gkSpan.textContent = team.goalkeeper;
 
-    function checkAnswer() {
-      const guessInput = document.getElementById('guess');
-      const guess = guessInput.value.trim();
-      const feedback = document.getElementById('feedback');
-      const scorebox = document.getElementById('scorebox');
-      const nextBtn = document.getElementById('next-btn');
+    // Create rows for defenders, midfielders, forwards
+    const createRow = (players, ariaLabel) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.setAttribute('aria-label', ariaLabel);
+      players.forEach((flag, i) => {
+        const span = document.createElement('span');
+        span.className = 'pos';
+        span.title = `${ariaLabel.slice(0, -1)} ${i+1}`;
+        span.textContent = flag;
+        row.appendChild(span);
+      });
+      return row;
+    };
 
-      if (!guess) {
-        feedback.textContent = "Please enter your guess.";
-        feedback.className = "feedback incorrect";
-        return;
-      }
+    pitch.appendChild(createRow(team.defenders, 'Defenders'));
+    pitch.appendChild(createRow(team.midfielders, 'Midfielders'));
+    pitch.appendChild(createRow(team.forwards, 'Forwards'));
+  }
 
-      // Placeholder: hardcoded correct answer for demo
-      // Replace this logic with your real answer checking
-      const correctAnswer = "Germany";
-
-      if (guess.toLowerCase() === correctAnswer.toLowerCase()) {
-        feedback.textContent = "Correct!";
-        feedback.className = "feedback correct";
-        score++;
-      } else {
-        feedback.textContent = `Incorrect! The correct team was ${correctAnswer}.`;
-        feedback.className = "feedback incorrect";
-      }
-      questionCount++;
-      scorebox.textContent = `Score: ${score} / ${questionCount}`;
-
-      guessInput.disabled = true;
-      nextBtn.style.display = 'inline-block';
-
-      // Optionally disable guess button until next
-      document.querySelector('.input-row button').disabled = true;
-    }
-
-    function nextLineup() {
-      if(questionCount >= maxQuestions) {
-        alert(`Quiz complete! Your final score is ${score} out of ${maxQuestions}.`);
-        return;
-      }
-      resetFeedbackAndScore();
-      loadNewLineup();
-    }
-
-    function resetFeedbackAndScore() {
-      document.getElementById('feedback').textContent = '';
-      document.getElementById('scorebox').textContent = '';
-      document.getElementById('next-btn').style.display = 'none';
-      const guessInput = document.getElementById('guess');
-      guessInput.value = '';
-      guessInput.disabled = false;
-      document.querySelector('.input-row button').disabled = false;
-    }
-
-    function loadNewLineup() {
-      // Placeholder function: here you’d load new lineup data based on mode
-      // For demo, we keep same lineup and goalkeeper.
-      // Replace this with your dynamic quiz logic.
-      console.log(`Loading lineup for mode: ${mode}`);
-
-      // Example: Update lineup players or clear form as needed
-
-      // If you want, clear guess box here:
-      resetFeedbackAndScore();
-    }
-
-    // Initialization on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      setMode('normal'); // Default mode
+  // Setup team selector buttons dynamically depending on current mode data
+  function renderTeamButtons() {
+    // Clear previous
+    teamSelectDiv.innerHTML = '';
+    const teams = teamsData[currentMode];
+    teams.forEach((team, index)=>{
+      const btn = document.createElement('button');
+      btn.className = 'team-btn';
+      if(index === currentTeamIndex) btn.classList.add('selected');
+      btn.textContent = team.name;
+      btn.setAttribute('aria-pressed', index === currentTeamIndex ? 'true' : 'false');
+      btn.onclick = () => {
+        if (currentTeamIndex === index) return; // no action if same
+        currentTeamIndex = index;
+        updateSelectedTeamButton();
+        loadLineup();
+        resetFeedbackAndScore();
+      };
+      teamSelectDiv.appendChild(btn);
     });
-  </script>
+  }
+  function updateSelectedTeamButton() {
+    const buttons = teamSelectDiv.querySelectorAll('button');
+    buttons.forEach((btn, i) => {
+      btn.classList.toggle('selected', i === currentTeamIndex);
+      btn.setAttribute('aria-pressed', i === currentTeamIndex);
+    });
+  }
+
+  // Mode button handler
+  function setMode(selectedMode) {
+    if(currentMode === selectedMode) return; // no action if same
+    currentMode = selectedMode;
+    currentTeamIndex = 0; // Reset to first team on mode change
+    modeBtns.forEach(btn => {
+      btn.classList.toggle('selected', btn.id === `btn-${selectedMode}`);
+      btn.setAttribute('aria-pressed', btn.id === `btn-${selectedMode}`);
+    });
+    renderTeamButtons();
+    loadLineup();
+    resetFeedbackAndScore();
+  }
+
+  // Load the current lineup based on mode and team index
+  function loadLineup() {
+    const team = teamsData[currentMode][currentTeamIndex];
+    renderLineup(team);
+    // Clear guess and feedback
+    guessInput.value = '';
+    guessInput.disabled = false;
+    feedback.textContent = '';
+    scorebox.textContent = `Score: ${score} / ${questionCount}`;
+    nextBtn.style.display = 'none';
+    document.querySelector('.input-row button').disabled = false;
+  }
+
+  // Check answer handler
+  function checkAnswer() {
+    const guess = guessInput.value.trim().toLowerCase();
+    if (guess === '') {
+      feedback.textContent = 'Please enter your guess.';
+      feedback.className = 'feedback incorrect';
+      return;
+    }
+    const correctAnswer = teamsData[currentMode][currentTeamIndex].name.toLowerCase();
+
+    if(guess === correctAnswer) {
+      feedback.textContent = 'Correct!';
+      feedback.className = 'feedback correct';
+      score++;
+    } else {
+      feedback.textContent = `Incorrect! The correct team was ${correctAnswer.charAt(0).toUpperCase() + correctAnswer.slice(1)}.`;
+      feedback.className = 'feedback incorrect';
+    }
+    questionCount++;
+    scorebox.textContent = `Score: ${score} / ${questionCount}`;
+    guessInput.disabled = true;
+    document.querySelector('.input-row button').disabled = true;
+    nextBtn.style.display = 'inline-block';
+  }
+
+  // Next lineup: cycles through teams, modes remain same. Ends quiz at maxQuestions
+  function nextLineup() {
+    if(questionCount >= maxQuestions) {
+      alert(`Quiz complete! Your final score is ${score} out of ${questionCount}.`);
+      return;
+    }
+    currentTeamIndex++;
+    if(currentTeamIndex >= teamsData[currentMode].length) {
+      currentTeamIndex = 0; // Loop back to first team
+    }
+    updateSelectedTeamButton();
+    loadLineup();
+  }
+
+  // Reset feedback and score display (for example on mode/team switch)
+  function resetFeedbackAndScore() {
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    scorebox.textContent = `Score: ${score} / ${questionCount}`;
+    nextBtn.style.display = 'none';
+    guessInput.disabled = false;
+    guessInput.value = '';
+    document.querySelector('.input-row button').disabled = false;
+  }
+
+  // Initialization
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTeamButtons();
+    setMode('normal'); // Default mode and lineup load
+  });
+
+  // Expose setMode globally so inline onclick works
+  window.setMode = setMode;
+  window.checkAnswer = checkAnswer;
+  window.nextLineup = nextLineup;
+</script>
 </body>
 </html>
 
